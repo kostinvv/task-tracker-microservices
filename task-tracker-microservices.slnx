@@ -1,0 +1,11 @@
+﻿<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/Tasks/">
+    <Project Path="src\Services\Tasks\TaskTracker.Services.Tasks.Api\TaskTracker.Services.Tasks.Api.csproj" Type="Classic C#" />
+    <Project Path="src\Services\Tasks\TaskTracker.Services.Tasks.ApplicationCore\TaskTracker.Services.Tasks.ApplicationCore.csproj" Type="Classic C#" />
+    <Project Path="src\Services\Tasks\TaskTracker.Services.Tasks.Infrastructure\TaskTracker.Services.Tasks.Infrastructure.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/src/UIs/" />
+  <Folder Name="/tests/" />
+</Solution>
