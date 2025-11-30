@@ -51,6 +51,8 @@ public class TaskItem
     
     public ApplicationUser? User { get; private set; }
     
+    // TODO: У задачи может быть время выполнения.
+    
     public static TaskItem Create(
         string title, 
         string description, 
@@ -61,5 +63,15 @@ public class TaskItem
         TaskState taskState = TaskState.ToDo)
     {
         return new TaskItem(title, description, taskState, createdAt, updatedAt, sortOrder, userId);
+    }
+
+    public void Update(string title, string description, TaskState state, int sortOrder, DateTime updatedAt)
+    {
+        // TODO: Валидация сущности при обновлении.
+        Title = title;
+        Description = description;
+        TaskState = state;
+        SortOrder = sortOrder;
+        UpdatedAt = updatedAt;
     }
 }
