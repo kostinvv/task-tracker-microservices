@@ -1,15 +1,16 @@
 using Microsoft.EntityFrameworkCore;
+using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Context;
-using TaskTracker.Services.Tasks.ApplicationCore.Common.Results;
 using TaskTracker.Services.Tasks.ApplicationCore.DTOs.Tasks;
+using TaskTracker.Services.Tasks.ApplicationCore.Errors;
 using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.ApplicationCore.Services;
 
 public class TaskService(IApplicationDbContext context) : ITaskService
 {
-    public async Task<OperationResult<IEnumerable<TaskItem>>> GetAllAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<ResultT<IEnumerable<TaskItem>>> GetAsync(Guid userId, CancellationToken cancellationToken)
     {
         return await context.Tasks
             .Where(taskItem => taskItem.UserId == userId)
@@ -17,39 +18,38 @@ public class TaskService(IApplicationDbContext context) : ITaskService
             .ToListAsync(cancellationToken);
     }
     
-    public async Task<OperationResult<TaskItem?>> GetByIdAsync(Guid taskId, CancellationToken cancellationToken)
+    public async Task<ResultT<TaskItem>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken)
     {
-        return await context.Tasks
+        var taskItem = await context.Tasks
             .AsNoTracking()
-            .FirstOrDefaultAsync(taskItem => taskItem.Id == taskId, cancellationToken);
-    }
+            .FirstOrDefaultAsync(taskItem => taskItem.Id == taskId && taskItem.UserId == userId, cancellationToken);
 
-    public async Task<OperationResult<TaskItem>> CreateAsync(TaskDto taskDto, CancellationToken cancellationToken)
-    {
-        var taskItem = TaskItem.Create(
-            title: taskDto.Title,
-            description: taskDto.Description,
-            createdAt: DateTime.UtcNow,
-            updatedAt: DateTime.UtcNow,
-            userId: taskDto.UserId,
-            sortOrder:  taskDto.SortOrder,
-            taskState: taskDto.State
-        );
-        
-        await context.Tasks.AddAsync(taskItem, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        if (taskItem == null)
+        {
+            return TaskItemErrors.NotFound(taskId.ToString());
+        }
         
         return taskItem;
     }
 
-    public async Task<OperationResult<TaskItem>> UpdateAsync(TaskDto taskDto, CancellationToken cancellationToken)
+    public async Task<ResultT<TaskItem>> CreateAsync(TaskDto taskDto, CancellationToken cancellationToken)
     {
-        var taskItem = await context.Tasks
-            .FirstOrDefaultAsync(taskItem => taskItem.Id == taskDto.Id, cancellationToken);
+        var taskItem = taskDto.ToEntity();
+        await context.Tasks.AddAsync(taskItem, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+        return taskItem;
+    }
 
-        if (taskItem is null || taskItem.UserId != taskDto.UserId)
+    public async Task<ResultT<TaskItem>> UpdateAsync(TaskDto taskDto, CancellationToken cancellationToken)
+    {
+        var taskItem = await context.Tasks.FirstOrDefaultAsync(
+            taskItem => taskItem.Id == taskDto.Id && 
+            taskItem.UserId == taskDto.UserId, 
+            cancellationToken: cancellationToken);
+
+        if (taskItem == null)
         {
-            return Error.RecordNotFound("Task not found.");
+            return TaskItemErrors.NotFound(taskDto.Id.ToString());
         }
 
         taskItem.Update(
@@ -63,9 +63,18 @@ public class TaskService(IApplicationDbContext context) : ITaskService
         return taskItem;
     }
 
-    public async Task DeleteAsync(TaskItem taskItem, CancellationToken cancellationToken)
+    public async Task<Result> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
+        var taskItem = await context.Tasks.FirstOrDefaultAsync(
+            taskItem => taskItem.Id == id && taskItem.UserId == userId, cancellationToken: cancellationToken);
+
+        if (taskItem == null)
+        {
+            return TaskItemErrors.NotFound(id.ToString());
+        }
+        
         context.Tasks.Remove(taskItem);
         await context.SaveChangesAsync(cancellationToken);
+        return Result.Success();
     }
 }

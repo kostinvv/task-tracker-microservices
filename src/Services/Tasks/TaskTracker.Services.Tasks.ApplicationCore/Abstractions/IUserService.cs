@@ -1,0 +1,10 @@
+using TaskTracker.Services.Shared.Results;
+using TaskTracker.Services.Tasks.ApplicationCore.Models;
+
+namespace TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
+
+public interface IUserService
+{
+    Task<ResultT<AuthenticationResult>> RegisterAsync(string email, string password);
+    Task<ResultT<AuthenticationResult>> LoginAsync(string email, string password);
+}

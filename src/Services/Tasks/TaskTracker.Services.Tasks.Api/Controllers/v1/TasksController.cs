@@ -1,11 +1,9 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskTracker.Services.Tasks.Api.Contracts.v1;
+using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.Api.Contracts.v1.Tasks;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
-using TaskTracker.Services.Tasks.ApplicationCore.Common.Results;
-using TaskTracker.Services.Tasks.ApplicationCore.DTOs.Tasks;
 
 namespace TaskTracker.Services.Tasks.Api.Controllers.v1;
 
@@ -16,92 +14,63 @@ namespace TaskTracker.Services.Tasks.Api.Controllers.v1;
 public class TasksController(ITaskService taskService) : BaseController
 {
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAsync(CancellationToken cancellationToken = default)
     {
-        var operationResult = await taskService.GetAllAsync(userId: UserId, cancellationToken);
-        var tasks = operationResult.Value.Select(TaskResponse.Map);
+        var result = await taskService.GetAsync(userId: UserId, cancellationToken);
         
-        return Ok(tasks);
+        return result.Match(
+            onSuccess: value => Ok(
+                value.Select(TaskResponse.Map)
+            ),
+            onFailure: Problem
+        );
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    [HttpGet("{id:guid}", Name = "GetTaskByIdV1")]
+    public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var operationResult = await taskService.GetByIdAsync(id, cancellationToken);
-        var taskItem = operationResult.Value;
-
-        if (taskItem is null || taskItem.UserId != UserId)
-        {
-            return NotFound();
-        }
-        var taskResponse = TaskResponse.Map(taskItem);
+        var result = await taskService.GetByIdAsync(id, UserId, cancellationToken);
         
-        return Ok(taskResponse);
+        return result.Match(
+            onSuccess: value => Ok(TaskResponse.Map(value)),
+            onFailure: Problem
+        );
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateAsync(TaskRequest taskRequest, CancellationToken cancellationToken = default)
     {
-        var taskDto = new TaskDto(
-            taskRequest.Id,
-            taskRequest.Title,
-            taskRequest.Description,
-            taskRequest.State,
-            taskRequest.SortOrder,
-            UserId
+        var result = await taskService.CreateAsync(taskDto: taskRequest.Map(UserId), cancellationToken);
+
+        return result.Match(
+            onSuccess: value => CreatedAtRoute(
+                routeName: "GetTaskByIdV1",
+                routeValues: new { id = value.Id },        
+                TaskResponse.Map(value)
+            ),
+            onFailure: Problem
         );
-
-        var operationResult = await taskService.CreateAsync(taskDto, cancellationToken);
-        var taskItem = operationResult.Value;
-        var taskResponse = TaskResponse.Map(taskItem);
-
-        return Ok(taskResponse);
     }
 
     [HttpPatch]
     public async Task<IActionResult> UpdateAsync(TaskRequest taskRequest, CancellationToken cancellationToken = default)
     {
-        var taskDto = new TaskDto(
-            taskRequest.Id,
-            taskRequest.Title,
-            taskRequest.Description,
-            taskRequest.State,
-            taskRequest.SortOrder,
-            UserId
+        var result = await taskService.UpdateAsync(taskRequest.Map(UserId), cancellationToken);
+        
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: Problem
         );
-
-        var operationResult = await taskService.UpdateAsync(taskDto, cancellationToken);
-
-        if (operationResult is { Succeeded: false, Error.Code: ErrorCode.NotFoundError })
-        {
-            return Problem(
-                detail: operationResult.Error.Description,
-                statusCode: StatusCodes.Status404NotFound
-            );
-        }
-        
-        var taskItem = operationResult.Value;
-        var taskResponse = TaskResponse.Map(taskItem);
-        var apiResponse = new ApiResponseObject<TaskResponse>(
-            $"Task \"{taskItem.Title}\" updated successfully.",  
-            taskResponse);
-        
-        return Ok(apiResponse);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var operationResult = await taskService.GetByIdAsync(id, cancellationToken);
-        var taskItem = operationResult.Value;
-        
-        if (taskItem is null || taskItem.UserId != UserId)
-        {
-            return NotFound();
-        }
+        var result = await taskService.DeleteAsync(id, UserId, cancellationToken);
 
-        await taskService.DeleteAsync(taskItem, cancellationToken);
-        var apiResponse = new ApiResponse($"Task \"{taskItem.Title}\" deleted successfully.");
-        return Ok(apiResponse);
+        return result.Match(
+            onSuccess: NoContent,
+            onFailure: Problem
+        );
     }
 }

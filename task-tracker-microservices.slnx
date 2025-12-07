@@ -1,6 +1,10 @@
 ﻿<Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/Services/" />
+  <Folder Name="/src/Services/EmailSender/" />
+  <Folder Name="/src/Services/Shared/">
+    <Project Path="src\Services\Shared\TaskTracker.Services.Shared\TaskTracker.Services.Shared.csproj" Type="Classic C#" />
+  </Folder>
   <Folder Name="/src/Services/Tasks/">
     <Project Path="src\Services\Tasks\TaskTracker.Services.Tasks.Api\TaskTracker.Services.Tasks.Api.csproj" Type="Classic C#" />
     <Project Path="src\Services\Tasks\TaskTracker.Services.Tasks.ApplicationCore\TaskTracker.Services.Tasks.ApplicationCore.csproj" Type="Classic C#" />

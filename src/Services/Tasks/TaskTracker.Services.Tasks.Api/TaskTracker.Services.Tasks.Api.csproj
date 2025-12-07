@@ -30,6 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Shared\TaskTracker.Services.Shared\TaskTracker.Services.Shared.csproj" />
       <ProjectReference Include="..\TaskTracker.Services.Tasks.ApplicationCore\TaskTracker.Services.Tasks.ApplicationCore.csproj" />
       <ProjectReference Include="..\TaskTracker.Services.Tasks.Infrastructure\TaskTracker.Services.Tasks.Infrastructure.csproj" />
     </ItemGroup>
