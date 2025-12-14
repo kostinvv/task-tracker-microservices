@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using TaskTracker.Services.Shared.Events.Users;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Auth;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Context;
@@ -120,6 +121,8 @@ builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddProducer<UserRegisteredEvent>(builder.Configuration.GetSection("Kafka:Tasks"));
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
 

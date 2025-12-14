@@ -27,9 +27,9 @@ public class UserController(IUserService userService) : BaseController
     [HttpPost]
     [ProducesResponseType(typeof(AuthenticationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RegisterAsync(RegisterRequest registerRequest)
+    public async Task<IActionResult> RegisterAsync(RegisterRequest registerRequest, CancellationToken cancellationToken = default)
     {
-        var result = await userService.RegisterAsync(email: registerRequest.Email, password: registerRequest.Password);
+        var result = await userService.RegisterAsync(email: registerRequest.Email, password: registerRequest.Password, cancellationToken);
         
         return result.Match(
             onSuccess: Ok,
@@ -44,9 +44,9 @@ public class UserController(IUserService userService) : BaseController
     [ProducesResponseType(typeof(AuthenticationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest loginRequest)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginRequest loginRequest, CancellationToken cancellationToken = default)
     {
-        var result = await userService.LoginAsync(email: loginRequest.Email, password: loginRequest.Password);
+        var result = await userService.LoginAsync(email: loginRequest.Email, password: loginRequest.Password, cancellationToken);
         
         return result.Match(
             onSuccess: Ok,

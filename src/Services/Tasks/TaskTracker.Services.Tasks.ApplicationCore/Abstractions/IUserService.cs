@@ -5,6 +5,6 @@ namespace TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 
 public interface IUserService
 {
-    Task<ResultT<AuthenticationResult>> RegisterAsync(string email, string password);
-    Task<ResultT<AuthenticationResult>> LoginAsync(string email, string password);
+    Task<ResultT<AuthenticationResult>> RegisterAsync(string email, string password, CancellationToken cancellationToken);
+    Task<ResultT<AuthenticationResult>> LoginAsync(string email, string password, CancellationToken cancellationToken);
 }
