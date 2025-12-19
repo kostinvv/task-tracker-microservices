@@ -41,6 +41,16 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = false; // Проверяем только UserName так-как E-mail = UserName.
 });
 
+builder.Services.AddCors(options 
+    => options.AddPolicy(name: "jsClient", configurePolicy: policyBuilder 
+        => policyBuilder
+            .WithOrigins("http://localhost:5173")
+            .AllowCredentials()
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+    )
+);
+
 var jwtOptions = builder.Configuration
     .GetSection(nameof(JwtOptions))
     .Get<JwtOptions>();
@@ -139,6 +149,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(policyName: "jsClient");
 
 app.UseRouting();
 

@@ -1,20 +1,47 @@
-export default function LogIn() {
+import { useContext, useState } from "react"
+import { Context } from '../main.jsx';
+import { observer } from "mobx-react-lite";
+
+function LogIn() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { store } = useContext(Context);
+
   return (
-    <form>
+    <>
       <div>
         <div>
           <label htmlFor='email'>E-mail</label>
-          <input id='email' name='email' type='email' placeholder='Enter your e-mail' autoComplete="on" />
+          <input 
+            onChange={event => setEmail(event.target.value)} 
+            value={email} 
+            id='email' 
+            name='email' 
+            type='email' 
+            placeholder='Enter your e-mail' 
+            autoComplete="on" 
+          />
         </div>
         <div>
           <label htmlFor='password'>Password</label>
-          <input id='password' name='password' type='password' placeholder='Enter your passowrd' autoComplete="on" />
+          <input 
+            onChange={event => setPassword(event.target.value)} 
+            value={password} 
+            id='password' 
+            name='password' 
+            type='password' 
+            placeholder='Enter your passowrd' 
+            autoComplete="on" 
+          />
         </div>
       </div>
       <div>
-        <button>Log In</button>
-        <button>Sign Up</button>
+        <button type="button" onClick={() => store.logIn(email, password)}>Log In</button>
+        <button type="button" onClick={() => store.signUp(email, password)}>Sign Up</button>
+        <button type="button" onClick={() => store.logOut()}>Log Out</button>
       </div>
-    </form>
+    </>
   )
 }
+
+export default observer(LogIn);
