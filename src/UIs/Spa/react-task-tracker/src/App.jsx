@@ -5,21 +5,25 @@ import './App.css';
 import { useContext, useEffect } from 'react';
 import { Context } from './main.jsx';
 import { observer } from 'mobx-react-lite';
+import { TaskBoard } from './components/TaskBoard.jsx';
 
 function App() {
   const { store } = useContext(Context);
 
-  useEffect(() => {
-    if (localStorage.getItem('accessToken')) {
-      store.checkAuth();
-    }
-  }, []);
+  //useEffect(() => {
+    //if (localStorage.getItem('accessToken')) {
+    //  store.checkAuth();
+    //}
+  //}, []);
 
   return (
+    /*
     <>
       <h1>{ store.isAuth ? `User ${store.user.email}` : '' }</h1>
       <LogIn />
     </>
+    */
+    <TaskBoard />
   ) 
 }
 
