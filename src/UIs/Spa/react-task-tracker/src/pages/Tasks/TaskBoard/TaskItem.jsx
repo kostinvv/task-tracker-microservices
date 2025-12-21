@@ -1,5 +1,9 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities";
+import { EditOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { Avatar, Card, Button } from 'antd';
+
+const { Meta } = Card;
 
 export function TaskItem({id, title}) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -18,9 +22,14 @@ export function TaskItem({id, title}) {
             style={style}
             {...attributes}
             {...listeners}
-            className='board-item'
         >
-            <div className="board-item-content">{ title }</div>
+            <Card
+                size="small"
+                style={{ marginBottom: 12 }}
+                title={title}
+            >
+                Content
+            </Card>
         </div>
     )
 }

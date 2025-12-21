@@ -1,29 +1,113 @@
-import Header from './components/Header';
-import LogIn from './components/LogIn';
-import Footer from './components/Footer';
 import './App.css';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Context } from './main.jsx';
 import { observer } from 'mobx-react-lite';
-import { TaskBoard } from './components/TaskBoard.jsx';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, LoginOutlined, LogoutOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Button, Layout, Menu, theme } from 'antd';
+import { AppRouters } from './AppRouters.jsx';
+
+const { Header, Sider, Content } = Layout;
 
 function App() {
-  const { store } = useContext(Context);
+  const [collapsed, setCollapsed] = useState(false);
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
 
-  //useEffect(() => {
-    //if (localStorage.getItem('accessToken')) {
-    //  store.checkAuth();
-    //}
-  //}, []);
+  const { store } = useContext(Context);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function checkAuthOnLoad() {
+      if (localStorage.getItem('accessToken')) {
+        await store.checkAuth();
+        if (store.isAuth) {
+          navigate('/tasks');
+        } else {
+          navigate('/login');
+        }
+      }
+    }
+    checkAuthOnLoad();
+  }, []);
+
+  const menuItems = !store.isAuth ?[
+    {
+      key: '/login',
+      icon: <LoginOutlined />,
+      label: <NavLink to="/login">Log In</NavLink>,
+    },
+    {
+      key: '/signup',
+      icon: <UserOutlined />,
+      label: <NavLink to="/signup">Sign Up</NavLink>,
+    }
+  ] : [
+    {
+      key: '/tasks',
+      icon: <CheckCircleOutlined />,
+      label: <NavLink to="/tasks">Tasks</NavLink>,
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: <a onClick={() => {
+        store.logOut();
+        navigate('/login');
+      }}>Log Out</a>,
+    }
+  ];
+
+  const siderStyle = {
+    overflow: 'auto',
+    height: '100vh',
+    position: 'sticky',
+    insetInlineStart: 0,
+    top: 0,
+    scrollbarWidth: 'thin',
+    scrollbarGutter: 'stable',
+  };
 
   return (
-    /*
-    <>
-      <h1>{ store.isAuth ? `User ${store.user.email}` : '' }</h1>
-      <LogIn />
-    </>
-    */
-    <TaskBoard />
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider trigger={null} collapsible collapsed={collapsed} style={siderStyle}>
+        <Menu
+          theme="dark"
+          mode="inline"
+          selectedKeys={[location.pathname]}
+          items={menuItems}
+        />
+      </Sider>
+      <Layout>
+        <Header style={{ padding: 0, background: colorBgContainer, position: 'sticky', top: 0, zIndex: 1, width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                fontSize: '16px',
+                width: 64,
+                height: 64,
+              }}
+            />
+            <div style={{ padding: '0 16px' }}>{store.user.email}</div>
+          </div>
+        </Header>
+        <Content
+          style={{
+            margin: '8px 8px',
+            padding: 16,
+            background: colorBgContainer,
+            borderRadius: borderRadiusLG,
+            overflow: 'hidden',
+          }}
+        >
+          <AppRouters/>
+        </Content>
+      </Layout>
+    </Layout>
   ) 
 }
 

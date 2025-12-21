@@ -21,7 +21,7 @@ export default class Store {
 
     async checkAuth() {
         try {
-            const response = await api.get(`/user`);
+            const response = await UserService.getUser();
             this.setUser(response.data);
             this.setAuth(true);
         } catch (error) {
@@ -35,7 +35,9 @@ export default class Store {
             localStorage.setItem('accessToken', response.data.accessToken);
             await this.checkAuth();
         } catch (error) {
-            console.error(error.response?.data?.title);
+            const errorMessage = error.response?.data?.title;
+            console.error(errorMessage);
+            return errorMessage;
         }
     }
 

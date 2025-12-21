@@ -1,5 +1,6 @@
 import { createContext } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import Store from './store/store.js';
@@ -12,6 +13,8 @@ export const Context = createContext({
 
 createRoot(document.getElementById('root')).render(
   <Context.Provider value={{store}}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
   </Context.Provider>
 )
