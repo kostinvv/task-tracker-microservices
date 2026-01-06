@@ -6,7 +6,7 @@ using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.Infrastructure;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : 
+public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : 
         IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options), 
         IApplicationDbContext
 {
