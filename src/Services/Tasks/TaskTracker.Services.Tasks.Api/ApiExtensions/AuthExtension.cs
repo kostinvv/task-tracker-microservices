@@ -8,6 +8,8 @@ namespace TaskTracker.Services.Tasks.Api.ApiExtensions;
 
 public static class AuthExtension
 {
+    private const string JwtSecretKeySectionName = "JWT_SECRET_KEY";
+    
     public static void AddAuthConfiguration(
         this IServiceCollection services,
         IConfiguration configuration)
