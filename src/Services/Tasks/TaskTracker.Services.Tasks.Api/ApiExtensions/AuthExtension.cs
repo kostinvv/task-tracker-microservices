@@ -29,7 +29,7 @@ public static class AuthExtension
         });
         
         var jwtOptions = configuration
-            .GetSection(nameof(JwtOptions))
+            .GetSection(JwtOptions.SectionName)
             .Get<JwtOptions>();
         
         services.AddAuthentication(options =>

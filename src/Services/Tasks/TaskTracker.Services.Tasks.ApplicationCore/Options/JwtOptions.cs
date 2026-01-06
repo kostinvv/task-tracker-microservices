@@ -2,10 +2,12 @@ namespace TaskTracker.Services.Tasks.ApplicationCore.Options;
 
 public class JwtOptions
 {
-    public string SecretKey { get; set; } = string.Empty;
+    public const string SectionName = "Jwt";
     
-    public string Issuer { get; set; } = string.Empty;
+    public string SecretKey { get; init; } = null!;
     
-    public string Audience { get; set; } = string.Empty;
-    public int ExpiresHours { get; set; }
+    public string? Issuer { get; init; }
+    
+    public string? Audience { get; init; }
+    public int ExpiresHours { get; init; }
 }
