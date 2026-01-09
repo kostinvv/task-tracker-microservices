@@ -47,7 +47,9 @@ export default class Store {
             localStorage.setItem('accessToken', response.data.accessToken);
             await this.checkAuth();
         } catch (error) {
-            console.error(error.response?.data?.title);
+            const errorMessage = error.response?.data?.title;
+            console.error(errorMessage);
+            return errorMessage;
         }
     }
 

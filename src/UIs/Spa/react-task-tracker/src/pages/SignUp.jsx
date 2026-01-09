@@ -1,4 +1,5 @@
-import { useContext, useState } from "react"
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Context } from '../main.jsx';
 import { observer } from "mobx-react-lite";
 import { Button, Form, Input, Alert } from "antd";
@@ -6,13 +7,16 @@ import { Button, Form, Input, Alert } from "antd";
 function SignUp() {
     const { store } = useContext(Context);
     const [errorMessage, setErrorMessage] = useState(null);
+    const navigate = useNavigate();
 
     async function onFinish (values) {
         const { email, password } = values;
-        const errorMessage = await store.logIn(email, password);
+        const errorMessage = await store.signUp(email, password);
         
         if (errorMessage) {
             setErrorMessage(errorMessage);
+        } else {
+            navigate('/tasks');
         }
     }
 
@@ -47,7 +51,7 @@ function SignUp() {
             </Form.Item>
             <Form.Item label={null}>
                 <Button type="primary" htmlType="submit">
-                    Log In
+                    Sign Up
                 </Button>
             </Form.Item>
         </Form>
