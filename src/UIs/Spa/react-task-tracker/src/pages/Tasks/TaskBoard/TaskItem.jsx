@@ -2,12 +2,16 @@ import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities";
 import { EditOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Avatar, Card, Button } from 'antd';
+import { DND_TASK_TYPE } from '../../../constants.js';
 
 const { Meta } = Card;
 
 export function TaskItem({id, title}) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-        id: id
+        id: id,
+        data: {
+            type: DND_TASK_TYPE
+        }
     });
 
     const style = {
