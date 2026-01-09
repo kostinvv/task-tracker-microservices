@@ -3,9 +3,9 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
-import Store from './store/store.js';
+import RootStore from './stores/RootStore.js';
 
-const store = new Store();
+const store = new RootStore();
 
 export const Context = createContext({
   store

@@ -3,7 +3,7 @@ import UserService from '../services/UserService.js';
 import axios from "axios";
 import api, { API_URL } from "../http/index.js";
 
-export default class Store {
+export default class AuthStore {
     user = {};
     isAuth = false;
 

@@ -11,7 +11,7 @@ function LogIn() {
 
     async function onFinish (values) {
         const { email, password } = values;
-        const errorMessage = await store.logIn(email, password);
+        const errorMessage = await store.auth.logIn(email, password);
         
         if (errorMessage) {
             setErrorMessage(errorMessage);

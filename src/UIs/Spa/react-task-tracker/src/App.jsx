@@ -21,8 +21,8 @@ function App() {
   useEffect(() => {
     async function checkAuthOnLoad() {
       if (localStorage.getItem('accessToken')) {
-        await store.checkAuth();
-        if (store.isAuth) {
+        await store.auth.checkAuth();
+        if (store.auth.isAuth) {
           navigate('/tasks');
         } else {
           navigate('/login');
@@ -32,7 +32,7 @@ function App() {
     checkAuthOnLoad();
   }, []);
 
-  const menuItems = !store.isAuth ?[
+  const menuItems = !store.auth.isAuth ?[
     {
       key: '/login',
       icon: <LoginOutlined />,
@@ -53,7 +53,7 @@ function App() {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: <a onClick={() => {
-        store.logOut();
+        store.auth.logOut();
         navigate('/login');
       }}>Log Out</a>,
     }
@@ -92,7 +92,7 @@ function App() {
                 height: 64,
               }}
             />
-            <div style={{ padding: '0 16px' }}>{store.user.email}</div>
+            <div style={{ padding: '0 16px' }}>{store.auth.user.email}</div>
           </div>
         </Header>
         <Content

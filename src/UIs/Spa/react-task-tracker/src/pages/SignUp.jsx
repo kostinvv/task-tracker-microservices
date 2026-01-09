@@ -11,7 +11,7 @@ function SignUp() {
 
     async function onFinish (values) {
         const { email, password } = values;
-        const errorMessage = await store.signUp(email, password);
+        const errorMessage = await store.auth.signUp(email, password);
         
         if (errorMessage) {
             setErrorMessage(errorMessage);
