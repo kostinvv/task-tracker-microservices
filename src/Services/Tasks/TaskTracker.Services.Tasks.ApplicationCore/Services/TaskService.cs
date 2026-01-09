@@ -4,18 +4,40 @@ using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Context;
 using TaskTracker.Services.Tasks.ApplicationCore.DTOs.Tasks;
 using TaskTracker.Services.Tasks.ApplicationCore.Errors;
+using TaskTracker.Services.Tasks.ApplicationCore.Extensions;
 using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.ApplicationCore.Services;
 
 public class TaskService(IApplicationDbContext context) : ITaskService
 {
-    public async Task<ResultT<IEnumerable<TaskItem>>> GetAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<ResultT<IEnumerable<TaskListDto>>> GetAsync(Guid userId, CancellationToken cancellationToken)
     {
-        return await context.Tasks
-            .Where(taskItem => taskItem.UserId == userId)
+        var tasks = await context.Tasks
             .AsNoTracking()
+            .OrderBy(taskItem => taskItem.TaskState)
+            .Where(taskItem => taskItem.UserId == userId)
             .ToListAsync(cancellationToken);
+        
+        var lookup = tasks.ToLookup(taskItem => taskItem.TaskState);
+        
+        return Enum
+            .GetValues<TaskState>()
+            .OrderBy(state => state)
+            .Select(state => new TaskListDto
+            {
+                Id = state,
+                Title = state.GetDisplayName(),
+                Tasks = lookup[state].Select(taskItem => new TaskDto(
+                    taskItem.Id,
+                    taskItem.Title,
+                    taskItem.Description,
+                    taskItem.TaskState,
+                    taskItem.SortOrder,
+                    taskItem.UserId)
+                )
+            })
+            .ToList();
     }
     
     public async Task<ResultT<TaskItem>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken)

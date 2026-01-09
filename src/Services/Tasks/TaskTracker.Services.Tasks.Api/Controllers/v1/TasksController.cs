@@ -19,9 +19,7 @@ public class TasksController(ITaskService taskService) : BaseController
         var result = await taskService.GetAsync(userId: UserId, cancellationToken);
         
         return result.Match(
-            onSuccess: value => Ok(
-                value.Select(TaskResponse.Map)
-            ),
+            onSuccess: Ok,
             onFailure: Problem
         );
     }

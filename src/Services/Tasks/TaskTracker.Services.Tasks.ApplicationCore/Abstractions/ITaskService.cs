@@ -6,7 +6,7 @@ namespace TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 
 public interface ITaskService
 {
-    Task<ResultT<IEnumerable<TaskItem>>> GetAsync(Guid userId, CancellationToken cancellationToken);
+    Task<ResultT<IEnumerable<TaskListDto>>> GetAsync(Guid userId, CancellationToken cancellationToken);
     
     Task<ResultT<TaskItem>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken);
     
