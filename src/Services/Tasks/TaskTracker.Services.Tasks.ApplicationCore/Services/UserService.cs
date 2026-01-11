@@ -31,8 +31,9 @@ public class UserService(
             var description = identityResult.Errors.First().Description;
             return UserErrors.CreateFailure(description);
         }
-
+        
         await kafkaProducer.ProduceAsync(
+            key: Guid.NewGuid().ToString(),
             new UserRegisteredEvent(UserId:  applicationUser.Id, Email: email), 
             cancellationToken);
         
