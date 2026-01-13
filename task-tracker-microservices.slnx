@@ -2,7 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/Services/" />
   <Folder Name="/src/Services/EmailSender/">
-    <Project Path="src\Services\EmailSender\TaskTracker.Services.EmailSender.Infrastructure\TaskTracker.Services.EmailSender.Infrastructure.csproj" Type="Classic C#" />
+    <Project Path="src\Services\EmailSender\TaskTracker.Services.EmailSender.Api\TaskTracker.Services.EmailSender.Api.csproj" Type="Classic C#" />
     <Project Path="src\Services\EmailSender\TaskTracker.Services.EmailSender\TaskTracker.Services.EmailSender.csproj" Type="Classic C#" />
   </Folder>
   <Folder Name="/src/Services/Shared/">
