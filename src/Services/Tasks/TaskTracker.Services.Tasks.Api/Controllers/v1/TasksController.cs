@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.Api.Contracts.v1.Tasks;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
+using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.Api.Controllers.v1;
 
@@ -11,12 +12,32 @@ namespace TaskTracker.Services.Tasks.Api.Controllers.v1;
 [ApiController]
 [ApiVersion(1)]
 [Route("api/v{version:apiVersion}/tasks")]
-public class TasksController(ITaskService taskService) : BaseController
+public class TasksController(ITaskService taskService, ILogger<TasksController> logger) : BaseController
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAsync(CancellationToken cancellationToken = default)
+    [HttpGet("board")]
+    public async Task<IActionResult> GetAsync(
+        [FromQuery] int size, 
+        CancellationToken cancellationToken = default)
     {
-        var result = await taskService.GetAsync(userId: UserId, cancellationToken);
+        var result = await taskService.GetBoardAsync(UserId, size, cancellationToken);
+        
+        return result.Match(
+            onSuccess: Ok,
+            onFailure: Problem
+        );
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAsync(
+        [FromQuery] GetTasksRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await taskService.GetAsync(
+            userId: UserId,
+            request.Page,
+            request.Size,
+            request.State,
+            cancellationToken);
         
         return result.Match(
             onSuccess: Ok,
@@ -24,7 +45,7 @@ public class TasksController(ITaskService taskService) : BaseController
         );
     }
 
-    [HttpGet("{id:guid}", Name = "GetTaskByIdV1")]
+    [HttpGet("{id:guid}", Name = nameof(GetByIdAsync))]
     public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var result = await taskService.GetByIdAsync(id, UserId, cancellationToken);
@@ -42,7 +63,7 @@ public class TasksController(ITaskService taskService) : BaseController
 
         return result.Match(
             onSuccess: value => CreatedAtRoute(
-                routeName: "GetTaskByIdV1",
+                routeName: nameof(GetByIdAsync),
                 routeValues: new { id = value.Id },        
                 TaskResponse.Map(value)
             ),

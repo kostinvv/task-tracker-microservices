@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Context;
+using TaskTracker.Services.Tasks.ApplicationCore.DTOs;
 using TaskTracker.Services.Tasks.ApplicationCore.DTOs.Tasks;
 using TaskTracker.Services.Tasks.ApplicationCore.Errors;
 using TaskTracker.Services.Tasks.ApplicationCore.Extensions;
@@ -13,35 +15,63 @@ public class TaskService(
     IApplicationDbContext context, 
     ILogger<TaskService> logger) : ITaskService
 {
-    public async Task<ResultT<IEnumerable<TaskListDto>>> GetAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<ResultT<PagedList<TaskDto>>> GetAsync(
+        Guid userId, 
+        int page, 
+        int size, 
+        TaskState state, 
+        CancellationToken cancellationToken)
     {
-        var tasks = await context.Tasks
+        var query = context.Tasks
             .AsNoTracking()
-            .OrderBy(taskItem => taskItem.TaskState)
-            .Where(taskItem => taskItem.UserId == userId)
-            .ToListAsync(cancellationToken);
+            .OrderBy(taskItem => taskItem.SortOrder)
+            .Where(taskItem => 
+                taskItem.UserId == userId && 
+                taskItem.TaskState == state)
+            .Select(taskItem => new TaskDto(
+                taskItem.Id, 
+                taskItem.Title, 
+                taskItem.Description, 
+                taskItem.TaskState, 
+                taskItem.SortOrder, 
+                taskItem.UserId));
         
-        var lookup = tasks.ToLookup(taskItem => taskItem.TaskState);
-        
-        return Enum
-            .GetValues<TaskState>()
-            .OrderBy(state => state)
-            .Select(state => new TaskListDto
-            {
-                Id = state,
-                Title = state.GetDisplayName(),
-                Tasks = lookup[state].Select(taskItem => new TaskDto(
+        return await PagedList<TaskDto>.CreateAsync(query, page, size);
+    }
+
+    public async Task<ResultT<IEnumerable<TaskListDto>>> GetBoardAsync(
+        Guid userId, 
+        int size, 
+        CancellationToken cancellationToken)
+    {
+        var result = new List<TaskListDto>();
+        var states = Enum.GetValues<TaskState>().OrderBy(state => state);
+
+        foreach (var state in states)
+        {
+            var query = context.Tasks
+                .AsNoTracking()
+                .OrderBy(taskItem => taskItem.SortOrder)
+                .Where(taskItem =>
+                    taskItem.UserId == userId &&
+                    taskItem.TaskState == state)
+                .Select(taskItem => new TaskDto(
                     taskItem.Id,
                     taskItem.Title,
                     taskItem.Description,
                     taskItem.TaskState,
                     taskItem.SortOrder,
-                    taskItem.UserId)
-                )
-            })
-            .ToList();
+                    taskItem.UserId));
+
+            var pagedList = await PagedList<TaskDto>
+                .CreateAsync(query, pageSize: size);
+            
+            result.Add(new TaskListDto(id: state, title: state.GetDisplayName(), pagedList: pagedList));
+        }
+
+        return result;
     }
-    
+
     public async Task<ResultT<TaskItem>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken)
     {
         var taskItem = await context.Tasks
