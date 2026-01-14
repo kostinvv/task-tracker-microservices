@@ -15,4 +15,6 @@ public interface ITaskService
     Task<ResultT<TaskItem>> UpdateAsync(TaskDto taskDto, CancellationToken cancellationToken);
     
     Task<Result> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken);
+    
+    Task<Result> MoveAsync(Guid taskId, Guid userId, int nextOrder, TaskState state, CancellationToken cancellationToken); 
 }

@@ -71,4 +71,25 @@ public class TasksController(ITaskService taskService) : BaseController
             onFailure: Problem
         );
     }
+
+    [HttpPatch("{id:guid}/move")]
+    public async Task<IActionResult> MoveAsync(
+        Guid id, 
+        [FromBody] TaskMoveRequest moveRequest, 
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("TaskId: {TaskId}. Request: {MoveRequest}", id, moveRequest);
+
+        var result = await taskService.MoveAsync(
+            taskId: id, 
+            userId: UserId, 
+            nextOrder: moveRequest.NextOrder,
+            state: moveRequest.NewState,
+            cancellationToken);
+        
+        return result.Match(
+            onSuccess: Ok,
+            onFailure: Problem
+        );
+    }
 }

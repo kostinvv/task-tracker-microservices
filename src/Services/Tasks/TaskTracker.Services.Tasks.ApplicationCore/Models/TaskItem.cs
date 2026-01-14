@@ -65,6 +65,16 @@ public class TaskItem
         return new TaskItem(title, description, taskState, createdAt, updatedAt, sortOrder, userId);
     }
 
+    public void SetSortOrder(int order)
+    {
+        SortOrder = order;
+    }
+
+    public void SetState(TaskState state)
+    {
+        TaskState = state;
+    }
+    
     public void Update(string title, string description, TaskState state, int sortOrder, DateTime updatedAt)
     {
         // TODO: Валидация сущности при обновлении.
