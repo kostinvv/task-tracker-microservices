@@ -166,6 +166,7 @@ public class TaskService(
         catch (Exception ex)
         {
             logger.LogError(ex, "{Message}", ex.Message);
+            await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }
@@ -178,6 +179,7 @@ public class TaskService(
         {   
             await context.Tasks
                 .Where(item => 
+                    item.UserId == taskItem.UserId &&
                     item.TaskState == taskItem.TaskState &&
                     item.SortOrder > prevOrder && 
                     item.SortOrder <= nextOrder)
@@ -189,6 +191,7 @@ public class TaskService(
         {
             await context.Tasks
                 .Where(item => 
+                    item.UserId == taskItem.UserId &&
                     item.TaskState == taskItem.TaskState &&
                     item.SortOrder < prevOrder && 
                     item.SortOrder >= nextOrder)
@@ -208,6 +211,7 @@ public class TaskService(
 
         await context.Tasks
             .Where(item => 
+                item.UserId == taskItem.UserId &&
                 item.TaskState == prevState &&
                 item.SortOrder > prevOrder)
             .ExecuteUpdateAsync(
@@ -216,6 +220,7 @@ public class TaskService(
         
         await context.Tasks
             .Where(item => 
+                item.UserId == taskItem.UserId &&
                 item.TaskState == nextState &&
                 item.SortOrder >= nextOrder)
             .ExecuteUpdateAsync(

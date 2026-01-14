@@ -37,7 +37,6 @@ export default class TasksStore {
             const uniqueIds = response.data.items.filter(task => !existingIds.has(task.id));
 
             currentColumn.cursorList.items.push(...uniqueIds);
-            currentColumn.cursorList.page = response.data.page;
             currentColumn.cursorList.hasNextPage = response.data.hasNextPage;
             this.setColumns([...this.columns]);
 

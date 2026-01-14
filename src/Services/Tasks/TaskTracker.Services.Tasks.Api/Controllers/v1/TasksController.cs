@@ -71,8 +71,8 @@ public class TasksController(ITaskService taskService, ILogger<TasksController> 
         );
     }
 
-    [HttpPatch]
-    public async Task<IActionResult> UpdateAsync(TaskRequest taskRequest, CancellationToken cancellationToken = default)
+    [HttpPut]
+    public async Task<IActionResult> UpdateAsync(Guid id, TaskRequest taskRequest, CancellationToken cancellationToken = default)
     {
         var result = await taskService.UpdateAsync(taskRequest.Map(UserId), cancellationToken);
         
