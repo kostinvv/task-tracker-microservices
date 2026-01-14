@@ -14,7 +14,7 @@ function TaskBoard() {
     const { store } = useContext(Context);
 
     useEffect(() => {
-        store.tasks.getTasks();
+        store.tasks.getBoard();
     }, []);
 
     const [activeData, setActiveData] = useState(null);
@@ -85,7 +85,7 @@ function TaskBoard() {
             >
                 <Row gutter={[16, 16]}>
                     {store.tasks.columns.map((column) =>
-                        <TaskColumn key={column.id} id={column.id} title={column.title} tasks={column.pagedList.items} />
+                        <TaskColumn key={column.id} id={column.id} title={column.title} cursorList={column.cursorList} />
                     )}                
                 </Row>
                 <DragOverlay style={{ opacity: 0.5 }} dropAnimation={null}>

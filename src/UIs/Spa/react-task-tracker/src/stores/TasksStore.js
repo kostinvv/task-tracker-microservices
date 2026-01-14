@@ -14,12 +14,35 @@ export default class TasksStore {
         this.columns = columns;
     }
 
-    async getTasks() {
+    getLastPosition = (id) => {
+        return this.columns[id].cursorList.items.length - 1
+    }
+
+    async getBoard() {
         try {
             const response = await TasksService.getBoard();
             this.setColumns(response.data);
         } catch (error) {
             console.log(error.response?.data?.title);
+        }
+    }
+
+    loadMoreTasks = async (afterPosition, state) => {
+        try {
+            const response = await TasksService.getTasks(afterPosition, state);
+            const columnIndex = this.columns.findIndex((column) => column.id === state);
+
+            const currentColumn = this.columns[columnIndex];
+            const existingIds = new Set(currentColumn.cursorList.items.map(task => task.id));
+            const uniqueIds = response.data.items.filter(task => !existingIds.has(task.id));
+
+            currentColumn.cursorList.items.push(...uniqueIds);
+            currentColumn.cursorList.page = response.data.page;
+            currentColumn.cursorList.hasNextPage = response.data.hasNextPage;
+            this.setColumns([...this.columns]);
+
+        } catch (error) {
+            console.log(error.response?.data?.title);            
         }
     }
 
@@ -30,7 +53,7 @@ export default class TasksStore {
 
         if (dndType === DND_TASK_TYPE) {
             return this.columns.find((column) => 
-                column.pagedList.items.find((task) => task.id === id)
+                column.cursorList.items.find((task) => task.id === id)
             );   
         }
     }
@@ -40,7 +63,7 @@ export default class TasksStore {
         if (!column) {
             return;
         }
-        return column.pagedList.items.findIndex((task) => task.id === id);
+        return column.cursorList.items.findIndex((task) => task.id === id);
     }
 
     saveTaskMove = (prevActiveIndex, activeId) => {
@@ -50,7 +73,7 @@ export default class TasksStore {
             return;
         }
 
-        const newActiveTaskIndex = activeColumn.pagedList.items.findIndex((task) => task.id === activeId);
+        const newActiveTaskIndex = activeColumn.cursorList.items.findIndex((task) => task.id === activeId);
         const activeColumnIndex = this.columns.findIndex((column) => column.id === activeColumn.id);
 
         try {
@@ -80,14 +103,14 @@ export default class TasksStore {
             return;
         }
 
-        const activeTaskIndex = activeColumn.pagedList.items.findIndex((task) => task.id === activeId);
+        const activeTaskIndex = activeColumn.cursorList.items.findIndex((task) => task.id === activeId);
 
         let newItems = [...this.columns];
-        const [removedItem] = newItems[activeColumnIndex].pagedList.items.splice(
+        const [removedItem] = newItems[activeColumnIndex].cursorList.items.splice(
             activeTaskIndex,
             1
         );
-        newItems[overColumnIndex].pagedList.items.push(removedItem);
+        newItems[overColumnIndex].cursorList.items.push(removedItem);
         this.setColumns(newItems);
     }
 
@@ -101,24 +124,24 @@ export default class TasksStore {
         
         const activeColumnIndex = this.columns.findIndex((column) => column.id === activeColumn.id);
         const overColumnIndex = this.columns.findIndex((column) => column.id === overColumn.id);
-        const activeTaskIndex = activeColumn.pagedList.items.findIndex((task) => task.id === activeId);
-        const overTaskIndex = overColumn.pagedList.items.findIndex((task) => task.id === overId);
+        const activeTaskIndex = activeColumn.cursorList.items.findIndex((task) => task.id === activeId);
+        const overTaskIndex = overColumn.cursorList.items.findIndex((task) => task.id === overId);
         
         if (activeColumnIndex === overColumnIndex) {
             let newItems = [...this.columns];
-            newItems[activeColumnIndex].pagedList.items = arrayMove(
-                newItems[activeColumnIndex].pagedList.items,
+            newItems[activeColumnIndex].cursorList.items = arrayMove(
+                newItems[activeColumnIndex].cursorList.items,
                 activeTaskIndex,
                 overTaskIndex
             );
             this.setColumns(newItems);
         } else {
             let newItems = [...this.columns];
-            const [removedItem] = newItems[activeColumnIndex].pagedList.items.splice(
+            const [removedItem] = newItems[activeColumnIndex].cursorList.items.splice(
                 activeTaskIndex,
                 1
             );
-            newItems[overColumnIndex].pagedList.items.splice(
+            newItems[overColumnIndex].cursorList.items.splice(
                 overTaskIndex,
                 0,
                 removedItem

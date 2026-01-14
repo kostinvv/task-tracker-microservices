@@ -15,9 +15,9 @@ public class TaskService(
     IApplicationDbContext context, 
     ILogger<TaskService> logger) : ITaskService
 {
-    public async Task<ResultT<PagedList<TaskDto>>> GetAsync(
+    public async Task<ResultT<CursorList<TaskDto>>> GetAsync(
         Guid userId, 
-        int page, 
+        int afterPosition, 
         int size, 
         TaskState state, 
         CancellationToken cancellationToken)
@@ -27,7 +27,8 @@ public class TaskService(
             .OrderBy(taskItem => taskItem.SortOrder)
             .Where(taskItem => 
                 taskItem.UserId == userId && 
-                taskItem.TaskState == state)
+                taskItem.TaskState == state &&
+                taskItem.SortOrder > afterPosition)
             .Select(taskItem => new TaskDto(
                 taskItem.Id, 
                 taskItem.Title, 
@@ -36,7 +37,7 @@ public class TaskService(
                 taskItem.SortOrder, 
                 taskItem.UserId));
         
-        return await PagedList<TaskDto>.CreateAsync(query, page, size);
+        return await CursorList<TaskDto>.CreateAsync(query, size);
     }
 
     public async Task<ResultT<IEnumerable<TaskListDto>>> GetBoardAsync(
@@ -63,10 +64,10 @@ public class TaskService(
                     taskItem.SortOrder,
                     taskItem.UserId));
 
-            var pagedList = await PagedList<TaskDto>
-                .CreateAsync(query, pageSize: size);
+            var pagedList = await CursorList<TaskDto>
+                .CreateAsync(query, size);
             
-            result.Add(new TaskListDto(id: state, title: state.GetDisplayName(), pagedList: pagedList));
+            result.Add(new TaskListDto(id: state, title: state.GetDisplayName(), cursorList: pagedList));
         }
 
         return result;
@@ -134,34 +135,39 @@ public class TaskService(
 
     public async Task<Result> MoveAsync(Guid taskId, Guid userId, int nextOrder, TaskState state, CancellationToken cancellationToken)
     {
-        var taskItem = await context.Tasks
-            .FirstOrDefaultAsync(taskItem => 
-                taskItem.Id == taskId && 
-                taskItem.UserId == userId, 
-                cancellationToken: cancellationToken);
+        await using var transaction = await context.Database
+            .BeginTransactionAsync(cancellationToken);
 
-        if (taskItem == null)
+        try
         {
-            return TaskItemErrors.NotFound(taskId.ToString());
-        }
-        await using var tx = await context.Database.BeginTransactionAsync(cancellationToken);
-        logger.LogInformation(
-            "From: {From}, To: {To}, State: {State}, NewState: {NewState}", 
-            taskItem.SortOrder, 
-            nextOrder, 
-            taskItem.TaskState, 
-            state);
+            var taskItem = await context.Tasks
+                .FirstOrDefaultAsync(taskItem => 
+                        taskItem.Id == taskId && 
+                        taskItem.UserId == userId, 
+                    cancellationToken: cancellationToken);
 
-        if (state != taskItem.TaskState)
-        {
-            await MoveToStateAsync(taskItem, state, nextOrder, cancellationToken);
+            if (taskItem == null)
+            {
+                return TaskItemErrors.NotFound(taskId.ToString());
+            }
+
+            if (state != taskItem.TaskState)
+            {
+                await MoveToStateAsync(taskItem, state, nextOrder, cancellationToken);
+            }
+            else
+            {
+                await MoveAndReorderAsync(taskItem, nextOrder, cancellationToken);    
+            }
+            
+            await transaction.CommitAsync(cancellationToken);
+            return Result.Success();
         }
-        else
+        catch (Exception ex)
         {
-            await MoveAndReorderAsync(taskItem, nextOrder, cancellationToken);    
+            logger.LogError(ex, "{Message}", ex.Message);
+            throw;
         }
-        await tx.CommitAsync(cancellationToken);
-        return Result.Success();
     }
 
     private async Task MoveAndReorderAsync(TaskItem taskItem, int nextOrder, CancellationToken cancellationToken)

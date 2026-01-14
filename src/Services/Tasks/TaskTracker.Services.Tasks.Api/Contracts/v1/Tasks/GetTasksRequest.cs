@@ -10,8 +10,7 @@ public class GetTasksRequest
     public int Size { get; set; }
 
     [Required]
-    [Range(1, 25)]
-    public int Page { get; set; }
+    public int AfterPosition { get; set; }
     
     [Required]
     public TaskState State { get; set; }
