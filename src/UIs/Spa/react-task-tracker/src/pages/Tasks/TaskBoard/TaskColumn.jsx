@@ -11,11 +11,22 @@ export function TaskColumn({ id, title, tasks }) {
             type: DND_COLUMN_TYPE
         }
     });
+
+    const useStyles = (info) => {
+        return {
+            root: {
+                borderColor: '#696FC7',
+                borderRadius: 8,
+            }
+        }
+    }
+
     return (                
         <Col xs={24} sm={12} md={8}>
             <Card
                 size="small" 
                 title={title}
+                styles={useStyles}
             >
                 <div ref={setNodeRef}>
                     <SortableContext id={id} items={tasks.map((task => task.id))}> 

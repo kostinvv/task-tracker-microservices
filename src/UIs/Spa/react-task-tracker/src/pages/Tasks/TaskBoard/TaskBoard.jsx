@@ -1,12 +1,14 @@
-import { closestCorners, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { useMemo, useContext, useEffect, useState } from 'react';
+import { closestCorners, DndContext, PointerSensor, useSensor, useSensors, DragOverlay } from "@dnd-kit/core";
+import { TaskItem } from "./TaskItem.jsx";
+import { useMemo, useContext, useEffect, useState, useRef } from 'react';
 import { Context } from '../../../main.jsx';
 import { observer } from 'mobx-react-lite';
 import { TaskColumn } from "./TaskColumn";
 import './TaskBoard.css';
-import { Row } from 'antd';
+import { Row, Button, Flex, Input } from 'antd';
 import { debounce } from "lodash";
 import { DND_COLUMN_TYPE, DND_TASK_TYPE } from '../../../constants.js';
+import { PlusOutlined } from '@ant-design/icons';
 
 function TaskBoard() {
     const { store } = useContext(Context);
@@ -15,23 +17,33 @@ function TaskBoard() {
         store.tasks.getTasks();
     }, []);
 
-    const [activeId, setActiveId] = useState(null);
+    const [activeData, setActiveData] = useState(null);
+    const [prevActiveIndex, setPrevActiveIndex] = useState(null);
+
+    const lastMoveKeyRef = useRef(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor)
+        useSensor(PointerSensor, {
+            activationConstraint: { distance: 8 }
+        })
     );
 
     function handleDragStart(event) {
         const { active } = event;
         const { id } = active;
-        setActiveId(id);
+
+        const index = store.tasks.getTaskIndex(id);
+
+        setPrevActiveIndex(index);
+        setActiveData(active.data.current);
     }
 
     function handleDragOver(event) {
         const { active, over } = event;
+
         // Handle task sorting.
         if (active.data.current.type === DND_TASK_TYPE &&
-            over.data.current.type === DND_TASK_TYPE &&
+            over?.data.current.type === DND_TASK_TYPE &&
             active && 
             over && 
             active.id !== over.id
@@ -49,29 +61,38 @@ function TaskBoard() {
         }
     }
 
-    const handleDragOverDebounced = useMemo(
-        () => debounce(handleDragOver, 25), 
-        [store.tasks.setColumns]
-    );
-
     function handleDragEnd(event) {
-        setActiveId(null);
+        const { active } = event;
+        store.tasks.saveTaskMove(prevActiveIndex, active.id);
+        setPrevActiveIndex(null);
+        setActiveData(null);
+        lastMoveKeyRef.current = null;
     }
 
     return (
-        <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOverDebounced}
-            onDragEnd={handleDragEnd}
-        >
-            <Row gutter={[16, 16]}>
-                {store.tasks.columns.map((column) =>
-                    <TaskColumn key={column.id} id={column.id} title={column.title} tasks={column.tasks} />
-                )}                
-            </Row>
-        </DndContext>
+        <>
+            <Flex gap={"middle"} justify={'space-between'} style={{ marginBottom: 20 }}>
+                <Button icon={<PlusOutlined />} type="primary">Create Task</Button>
+                <Input.Search style={{ width: '20%' }} placeholder="Search" />
+            </Flex>
+            
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+            >
+                <Row gutter={[16, 16]}>
+                    {store.tasks.columns.map((column) =>
+                        <TaskColumn key={column.id} id={column.id} title={column.title} tasks={column.pagedList.items} />
+                    )}                
+                </Row>
+                <DragOverlay style={{ opacity: 0.5 }} dropAnimation={null}>
+                    {activeData ? <TaskItem id={activeData.id} title={activeData.title} /> : null}
+                </DragOverlay>
+            </DndContext>
+        </>
     )
 }
 
