@@ -15,6 +15,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         
         builder.Entity<ApplicationUser>().ToTable("Users", "identity");
         builder.Entity<ApplicationRole>().ToTable("Roles", "identity");
