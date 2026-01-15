@@ -1,7 +1,7 @@
 import { useContext, useState } from "react"
 import { Context } from '../main.jsx';
 import { observer } from "mobx-react-lite";
-import { Button, Form, Input, Alert } from "antd";
+import { Button, Form, Input, Alert, Card } from "antd";
 import { useNavigate } from "react-router-dom";
 
 function LogIn() {
@@ -25,36 +25,38 @@ function LogIn() {
     }
 
     return (
-        <Form
-            name="basic"
-            layout='vertical'
-            style={{ maxWidth: 600 }}
-            onFinish={onFinish}
-            onFinishFailed={onFinishFailed}
-            autoComplete="off"
-        >
-            <h1>Log In</h1>
-            { errorMessage ? <Alert style={{ marginBottom: 16 }} type="error" title={errorMessage} banner /> : null }
-            <Form.Item
-                label='E-mail'
-                name='email'
-                rules={[{ required: true, message: 'Please input your e-mail' }]}
+        <Card style={{ maxWidth: 800 }}>
+            <Form
+                name="basic"
+                layout='vertical'
+                style={{ maxWidth: 800 }}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off"
             >
-                <Input placeholder="Enter your e-mail" />
-            </Form.Item>
-            <Form.Item
-                label='Password'
-                name='password'
-                rules={[{ required: true, message: 'Please input your password' }]}
-            >
-                <Input.Password placeholder="Enter your e-mail" />
-            </Form.Item>
-            <Form.Item label={null}>
-                <Button type="primary" htmlType="submit">
-                    Log In
-                </Button>
-            </Form.Item>
-        </Form>
+                <h1>Log In</h1>
+                { errorMessage ? <Alert style={{ marginBottom: 16 }} type="error" title={errorMessage} banner /> : null }
+                <Form.Item
+                    label='E-mail'
+                    name='email'
+                    rules={[{ required: true, message: 'Please input your e-mail' }]}
+                >
+                    <Input placeholder="Enter your e-mail" />
+                </Form.Item>
+                <Form.Item
+                    label='Password'
+                    name='password'
+                    rules={[{ required: true, message: 'Please input your password' }]}
+                >
+                    <Input.Password placeholder="Enter your e-mail" />
+                </Form.Item>
+                <Form.Item label={null}>
+                    <Button type="primary" htmlType="submit">
+                        Log In
+                    </Button>
+                </Form.Item>
+            </Form>
+        </Card>
     )
 }
 

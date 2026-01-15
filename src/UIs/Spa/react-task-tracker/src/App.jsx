@@ -97,10 +97,8 @@ function App() {
         </Header>
         <Content
           style={{
-            margin: '8px 8px',
             padding: 16,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
+            background: '#B6D0E2',
             overflow: 'hidden',
           }}
         >

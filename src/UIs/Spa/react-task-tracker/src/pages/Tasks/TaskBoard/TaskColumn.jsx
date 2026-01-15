@@ -1,12 +1,13 @@
 import { useDroppable } from "@dnd-kit/core";
-import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
+import { SortableContext } from "@dnd-kit/sortable";
 import { useContext } from 'react';
 import { Context } from '../../../main.jsx';
 import { TaskItem } from "./TaskItem";
 import { Button, Card, Col } from 'antd';
 import { DND_COLUMN_TYPE } from '../../../constants.js';
+import { PlusOutlined } from '@ant-design/icons';
 
-export function TaskColumn({ id, title, cursorList }) {
+export function TaskColumn({ id, title, cursorList, showCreateTaskModal, showUpdateTaskModal }) {
     const { store } = useContext(Context);
     const { setNodeRef } = useDroppable({ 
         id: id,
@@ -15,15 +16,6 @@ export function TaskColumn({ id, title, cursorList }) {
         }
     });
 
-    const useStyles = (info) => {
-        return {
-            root: {
-                borderColor: '#696FC7',
-                borderRadius: 8,
-            }
-        }
-    }
-
     const handleShowMore = () => {
         const stateId = id;
         const afterPosition = store.tasks.getLastPosition(stateId);
@@ -31,20 +23,26 @@ export function TaskColumn({ id, title, cursorList }) {
     }
 
     return (                
-        <Col xs={24} sm={12} md={8}>
+        <Col xs={24} sm={24} md={12} lg={12} xl={8}>
             <Card
-                size="small" 
+                size="large" 
                 title={title}
-                styles={useStyles}
             >
                 <div ref={setNodeRef}>
                     <SortableContext id={id} items={cursorList.items.map((task => task.id))}> 
                         {cursorList.items.map((task) => 
-                            <TaskItem key={task.id} id={task.id} title={task.title} />
+                            <TaskItem 
+                                key={task.id} 
+                                id={task.id} 
+                                title={task.title} 
+                                columnTitle={title}
+                                showUpdateTaskModal={showUpdateTaskModal} 
+                            />
                         )} 
                     </SortableContext>      
                 </div>  
-                { cursorList.hasNextPage ? <Button onClick={handleShowMore}>Show More</Button> : null }
+                { cursorList.hasNextPage ? <Button onClick={handleShowMore} style={{ marginBottom: 12 }}>Show More</Button> : null }
+                <Button onClick={() => showCreateTaskModal(id)} type="dashed" size="large" icon={<PlusOutlined />} block>Add Task</Button>
             </Card>
         </Col>
     )

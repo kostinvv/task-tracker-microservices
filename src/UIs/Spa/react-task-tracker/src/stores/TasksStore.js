@@ -90,7 +90,6 @@ export default class TasksStore {
     moveTask = (activeId, overId) => {
         const activeColumn = this.findValueOfItems(activeId, DND_TASK_TYPE);
         const overColumn = this.findValueOfItems(overId, DND_COLUMN_TYPE);
-        
         if (!activeColumn || !overColumn) {
             return;
         }
@@ -146,6 +145,84 @@ export default class TasksStore {
                 removedItem
             );
             this.setColumns(newItems);
+        }
+    }
+
+    getTask = async (id) => {
+        try {
+            const response = await TasksService.getTask(id);
+            return response.data;
+        } catch (error) {
+            console.error(error.response?.data?.title);
+        }
+    }
+
+    createTask = async (request) => {
+        try {
+            const items = this.columns[request.state].cursorList.items.slice(-1);
+            let sortOrder = 0
+
+            const response = await TasksService.createTask({
+                ...request,
+                sortOrder
+            });
+
+            const newItem = response.data;
+            this.columns[request.state].cursorList.items.splice(sortOrder, 0, newItem);
+            this.setColumns([...this.columns]);
+
+            return response;
+        } catch (error) {
+            console.error(error.response?.data?.title);
+        }
+    }
+
+    deleteTask = async (id, state) => {
+        try {
+            const response = await TasksService.deleteTask(id);
+
+            let newItems = [...this.columns];
+            const column = newItems[state];
+            const activeTaskIndex = column.cursorList.items.findIndex((task) => task.id === id);
+
+            column.cursorList.items.splice(activeTaskIndex, 1);
+            this.setColumns(newItems);
+
+            return response;
+        } catch (error) {
+            console.error(error.response?.data?.title);
+        }
+    }
+
+    updateTask = async (taskId, taskState, updateTaskRequest) => {
+        try {
+            let newItems = [...this.columns];
+            const column = newItems[taskState];
+
+            const activeTaskIndex = column.cursorList.items.findIndex((task) => task.id === taskId);
+            const task = column.cursorList.items[activeTaskIndex];
+            task.title = updateTaskRequest.title;
+
+            if (taskState !== updateTaskRequest.state) {
+                const [removedItem] = newItems[taskState].cursorList.items.splice(
+                    activeTaskIndex,
+                    1
+                );
+                
+                const newSortOrder = 0;
+
+                newItems[updateTaskRequest.state].cursorList.items.splice(newSortOrder, 0, removedItem);
+                task.sortOrder = newSortOrder;
+                task.state = updateTaskRequest.state;
+                updateTaskRequest.sortOrder = newSortOrder;
+            }
+
+            const response = await TasksService.updateTask(taskId, updateTaskRequest);
+            this.setColumns(newItems);
+
+            return response;
+        } catch (error) {
+            console.error(error.response?.data?.title);
         }
     }
 }
