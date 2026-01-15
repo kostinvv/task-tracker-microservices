@@ -128,20 +128,24 @@ public class TaskService(
         
         try
         {
+            var sortOrder = taskItem.SortOrder;
+            
             if (taskItem.TaskState != taskDto.State)
             {
                 await context.Tasks
                     .Where(item => item.UserId == taskDto.UserId && item.TaskState == taskDto.State)
                     .ExecuteUpdateAsync(
                         c => c.SetProperty(item => item.SortOrder, item => item.SortOrder + 1), 
-                        cancellationToken);   
+                        cancellationToken);
+
+                sortOrder = 0;
             }
             
             taskItem.Update(
                 title: taskDto.Title,
                 description: taskDto.Description,
                 state: taskDto.State,
-                sortOrder: taskDto.SortOrder,
+                sortOrder: sortOrder,
                 updatedAt: DateTime.UtcNow
             );
             await context.SaveChangesAsync(cancellationToken);

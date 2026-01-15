@@ -214,7 +214,6 @@ export default class TasksStore {
                 newItems[updateTaskRequest.state].cursorList.items.splice(newSortOrder, 0, removedItem);
                 task.sortOrder = newSortOrder;
                 task.state = updateTaskRequest.state;
-                updateTaskRequest.sortOrder = newSortOrder;
             }
 
             const response = await TasksService.updateTask(taskId, updateTaskRequest);
