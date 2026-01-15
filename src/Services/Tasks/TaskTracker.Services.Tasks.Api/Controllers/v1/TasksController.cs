@@ -48,33 +48,41 @@ public class TasksController(ITaskService taskService, ILogger<TasksController> 
     [HttpGet("{id:guid}", Name = nameof(GetByIdAsync))]
     public async Task<IActionResult> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var result = await taskService.GetByIdAsync(id, UserId, cancellationToken);
+        var result = await taskService.GetByIdAsync(
+            taskId: id, 
+            userId: UserId, 
+            cancellationToken);
         
         return result.Match(
-            onSuccess: value => Ok(TaskResponse.Map(value)),
+            onSuccess: taskItem => Ok(new TaskResponse(taskItem.Id, taskItem.Title, taskItem.TaskState, taskItem.SortOrder, taskItem.Description)),
             onFailure: Problem
         );
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(TaskRequest taskRequest, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CreateAsync([FromBody] TaskRequest taskRequest, CancellationToken cancellationToken = default)
     {
-        var result = await taskService.CreateAsync(taskDto: taskRequest.Map(UserId), cancellationToken);
+        var result = await taskService.CreateAsync(
+            taskDto: taskRequest.ToDto(userId: UserId), 
+            cancellationToken: cancellationToken);
 
         return result.Match(
             onSuccess: value => CreatedAtRoute(
                 routeName: nameof(GetByIdAsync),
-                routeValues: new { id = value.Id },        
-                TaskResponse.Map(value)
+                routeValues: new { id = value.Id },
+                new TaskResponse(value.Id, value.Title, value.TaskState, value.SortOrder)
             ),
             onFailure: Problem
         );
     }
 
-    [HttpPut]
+    [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateAsync(Guid id, TaskRequest taskRequest, CancellationToken cancellationToken = default)
     {
-        var result = await taskService.UpdateAsync(taskRequest.Map(UserId), cancellationToken);
+        var result = await taskService.UpdateAsync(
+            taskId: id,
+            taskDto: taskRequest.ToDto(userId: UserId), 
+            cancellationToken: cancellationToken);
         
         return result.Match(
             onSuccess: NoContent,

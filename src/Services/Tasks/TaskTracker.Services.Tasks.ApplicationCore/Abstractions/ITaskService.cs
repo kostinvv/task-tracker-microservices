@@ -15,7 +15,7 @@ public interface ITaskService
     
     Task<ResultT<TaskItem>> CreateAsync(TaskDto taskDto, CancellationToken cancellationToken);
 
-    Task<ResultT<TaskItem>> UpdateAsync(TaskDto taskDto, CancellationToken cancellationToken);
+    Task<ResultT<TaskItem>> UpdateAsync(Guid taskId, TaskDto taskDto, CancellationToken cancellationToken);
     
     Task<Result> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken);
     
