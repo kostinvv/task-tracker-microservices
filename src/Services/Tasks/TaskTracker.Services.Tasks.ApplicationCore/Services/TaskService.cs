@@ -132,13 +132,26 @@ public class TaskService(
             
             if (taskItem.TaskState != taskDto.State)
             {
-                await context.Tasks
-                    .Where(item => item.UserId == taskDto.UserId && item.TaskState == taskDto.State)
-                    .ExecuteUpdateAsync(
-                        c => c.SetProperty(item => item.SortOrder, item => item.SortOrder + 1), 
-                        cancellationToken);
-
                 sortOrder = 0;
+                var newState = taskDto.State;
+                
+                await context.Tasks
+                    .Where(item => 
+                        item.UserId == taskItem.UserId &&
+                        item.TaskState == taskItem.TaskState &&
+                        item.SortOrder > taskItem.SortOrder)
+                    .ExecuteUpdateAsync(
+                        c => c.SetProperty(item => item.SortOrder, item => item.SortOrder - 1),
+                        cancellationToken);
+        
+                await context.Tasks
+                    .Where(item => 
+                        item.UserId == taskItem.UserId &&
+                        item.TaskState == newState &&
+                        item.SortOrder >= sortOrder)
+                    .ExecuteUpdateAsync(
+                        c => c.SetProperty(item => item.SortOrder, item => item.SortOrder + 1),
+                        cancellationToken);
             }
             
             taskItem.Update(
@@ -173,6 +186,9 @@ public class TaskService(
                 return TaskItemErrors.NotFound(id.ToString());
             }
             
+            context.Tasks.Remove(taskItem);
+            await context.SaveChangesAsync(cancellationToken);
+            
             await context.Tasks
                 .Where(item => 
                     item.UserId == userId && 
@@ -181,9 +197,7 @@ public class TaskService(
                 .ExecuteUpdateAsync(
                     c => c.SetProperty(item => item.SortOrder, item => item.SortOrder - 1), 
                     cancellationToken);   
-        
-            context.Tasks.Remove(taskItem);
-            await context.SaveChangesAsync(cancellationToken);
+            
             await transaction.CommitAsync(cancellationToken);
             return Result.Success();
         }
