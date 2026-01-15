@@ -13,7 +13,7 @@ public class TaskItem
     
     private TaskItem(
         string title, 
-        string description, 
+        string? description, 
         TaskState taskState, 
         DateTime createdAt, 
         DateTime updatedAt, 
@@ -37,7 +37,7 @@ public class TaskItem
     public string Title { get; private set; } = null!;
     
     [MaxLength(MaxDescriptionLength)]
-    public string Description { get; private set; } = string.Empty;
+    public string? Description { get; private set; } = string.Empty;
 
     public TaskState TaskState { get; private set; }
     
@@ -55,7 +55,7 @@ public class TaskItem
     
     public static TaskItem Create(
         string title, 
-        string description, 
+        string? description, 
         DateTime createdAt, 
         DateTime updatedAt, 
         Guid userId,
@@ -75,9 +75,8 @@ public class TaskItem
         TaskState = state;
     }
     
-    public void Update(string title, string description, TaskState state, int sortOrder, DateTime updatedAt)
+    public void Update(string title, string? description, TaskState state, int sortOrder, DateTime updatedAt)
     {
-        // TODO: Валидация сущности при обновлении.
         Title = title;
         Description = description;
         TaskState = state;

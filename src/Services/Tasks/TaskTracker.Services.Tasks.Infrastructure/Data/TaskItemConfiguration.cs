@@ -17,7 +17,6 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
         
         builder
             .Property(taskItem => taskItem.Description)
-            .IsRequired()
             .HasMaxLength(TaskItem.MaxDescriptionLength);
     }
 }
