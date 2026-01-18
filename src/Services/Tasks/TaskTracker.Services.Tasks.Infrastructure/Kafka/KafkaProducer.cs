@@ -21,8 +21,9 @@ public class KafkaProducer<TMessage> : IKafkaProducer<TMessage>
             EnableIdempotence = true,
             Acks = Acks.All,
             ClientId = "default-producer",
-            MessageSendMaxRetries = 3,
-            RetryBackoffMs = 1000
+            MessageSendMaxRetries = 1,
+            RetryBackoffMs = 100,
+            MessageTimeoutMs = 2000
         };
         
         _logger = logger;
