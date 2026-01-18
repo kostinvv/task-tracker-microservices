@@ -15,10 +15,9 @@ export default class TasksService {
         return await api.get(`/tasks/${id}`);
     }
 
-    static async move(taskId, prevOrder, nextOrder, newState) {
+    static async move(taskId, newOrder, newState) {
         return await api.patch(`/tasks/${taskId}/move`, {
-            prevOrder,
-            nextOrder,
+            newOrder,
             newState
         });
     }

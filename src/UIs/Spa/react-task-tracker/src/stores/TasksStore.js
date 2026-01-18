@@ -65,7 +65,7 @@ export default class TasksStore {
         return column.pagedList.items.findIndex((task) => task.id === id);
     }
 
-    saveTaskMove = (prevActiveIndex, activeId) => {
+    saveTaskMove = (activeId) => {
         const activeColumn = this.findValueOfItems(activeId, DND_TASK_TYPE);
 
         if (!activeColumn) {
@@ -78,7 +78,6 @@ export default class TasksStore {
         try {
             TasksService.move(
                 activeId, 
-                prevActiveIndex, 
                 newActiveTaskIndex,
                 activeColumnIndex
             );            
@@ -159,8 +158,7 @@ export default class TasksStore {
 
     createTask = async (request) => {
         try {
-            const items = this.columns[request.state].pagedList.items.slice(-1);
-            let sortOrder = 0
+            let sortOrder = this.getLastPosition(request.state)
 
             const response = await TasksService.createTask({
                 ...request,
@@ -195,31 +193,39 @@ export default class TasksStore {
     }
 
     updateTask = async (taskId, taskState, updateTaskRequest) => {
+        // доделать завтра (на backend нужно тоже другой request передавать).
         try {
+            await TasksService.updateTask(taskId, {
+                title: updateTaskRequest.title,
+                description: updateTaskRequest.description
+            });
+
             let newItems = [...this.columns];
             const column = newItems[taskState];
 
             const activeTaskIndex = column.pagedList.items.findIndex((task) => task.id === taskId);
+
             const task = column.pagedList.items[activeTaskIndex];
+            
             task.title = updateTaskRequest.title;
+            task.description = updateTaskRequest.description;
 
             if (taskState !== updateTaskRequest.state) {
+                const newOrder = 0;
+
+                await TasksService.move(taskId, newOrder, updateTaskRequest.state);
+
                 const [removedItem] = newItems[taskState].pagedList.items.splice(
                     activeTaskIndex,
                     1
                 );
-                
-                const newSortOrder = 0;
 
-                newItems[updateTaskRequest.state].pagedList.items.splice(newSortOrder, 0, removedItem);
-                task.sortOrder = newSortOrder;
+                newItems[updateTaskRequest.state].pagedList.items.splice(newOrder, 0, removedItem);
+                task.sortOrder = newOrder;
                 task.state = updateTaskRequest.state;
             }
 
-            const response = await TasksService.updateTask(taskId, updateTaskRequest);
             this.setColumns(newItems);
-
-            return response;
         } catch (error) {
             console.error(error.response?.data?.title);
         }

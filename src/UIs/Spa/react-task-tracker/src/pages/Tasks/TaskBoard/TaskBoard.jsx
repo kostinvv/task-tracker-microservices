@@ -98,7 +98,7 @@ function TaskBoard() {
 
     function handleDragEnd(event) {
         const { active } = event;
-        store.tasks.saveTaskMove(prevActiveIndex, active.id);
+        store.tasks.saveTaskMove(active.id);
         setPrevActiveIndex(null);
         setActiveData(null);
     }
