@@ -27,8 +27,8 @@ function App() {
         } else {
           navigate('/login');
         }
-      } else {
-        navigate('login');
+      } else if (window.location.pathname === '/') {
+        navigate('/login');
       }
     }
     checkAuthOnLoad();
