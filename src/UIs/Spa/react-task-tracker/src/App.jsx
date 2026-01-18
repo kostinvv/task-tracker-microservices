@@ -27,6 +27,8 @@ function App() {
         } else {
           navigate('/login');
         }
+      } else {
+        navigate('login');
       }
     }
     checkAuthOnLoad();

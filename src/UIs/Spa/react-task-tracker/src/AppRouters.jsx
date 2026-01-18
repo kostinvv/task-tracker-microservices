@@ -6,6 +6,7 @@ import Tasks from "./pages/Tasks/Tasks.jsx";
 export function AppRouters() {
     return (
         <Routes>
+            <Route path="/" element={<LogIn />} />
             <Route path="/login" element={<LogIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/tasks" element={<Tasks />} />
