@@ -5,6 +5,9 @@
     <Project Path="src\Services\EmailSender\TaskTracker.Services.EmailSender.Api\TaskTracker.Services.EmailSender.Api.csproj" Type="Classic C#" />
     <Project Path="src\Services\EmailSender\TaskTracker.Services.EmailSender\TaskTracker.Services.EmailSender.csproj" Type="Classic C#" />
   </Folder>
+  <Folder Name="/src/Services/Scheduler/">
+    <Project Path="src\Services\Scheduler\TaskTracker.Services.Scheduler\TaskTracker.Services.Scheduler.csproj" Type="Classic C#" />
+  </Folder>
   <Folder Name="/src/Services/Shared/">
     <Project Path="src\Services\Shared\TaskTracker.Services.Shared\TaskTracker.Services.Shared.csproj" Type="Classic C#" />
   </Folder>
