@@ -12,7 +12,8 @@ using TaskTracker.Services.Tasks.ApplicationCore.Models;
 namespace TaskTracker.Services.Tasks.ApplicationCore.Services;
 
 public class TaskService(
-    IApplicationDbContext context, 
+    IApplicationDbContext context,
+    ITaskOrderService taskOrderService,
     ILogger<TaskService> logger) : ITaskService
 {
     public async Task<ResultT<PagedList<TaskDto>>> GetAsync(
@@ -70,7 +71,7 @@ public class TaskService(
         return result;
     }
 
-    public async Task<ResultT<TaskItem>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken)
+    public async Task<ResultT<TaskDto>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken)
     {
         var taskItem = await context.Tasks
             .AsNoTracking()
@@ -80,93 +81,60 @@ public class TaskService(
         {
             return TaskItemErrors.NotFound(taskId.ToString());
         }
-        
-        return taskItem;
+
+        return TaskDto.CreateWithDescription(taskItem);
     }
 
-    public async Task<ResultT<TaskItem>> CreateAsync(TaskDto taskDto, CancellationToken cancellationToken)
+    public async Task<ResultT<TaskDto>> CreateAsync(TaskDto taskDto, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         
         try
         {
-            await context.Tasks
-                .Where(item => item.UserId == taskDto.UserId && item.TaskState == taskDto.State)
-                .ExecuteUpdateAsync(
-                    c => c.SetProperty(item => item.SortOrder, item => item.SortOrder + 1), 
-                    cancellationToken);
-
+            await taskOrderService.UpdateSortOrderDownAsync(
+                userId: taskDto.UserId,
+                state: taskDto.State,
+                minOrderExclusive: taskDto.SortOrder,
+                maxOrderExclusive: null,
+                ct: cancellationToken);
+            
             var taskItem = taskDto.ToEntity();
             await context.Tasks.AddAsync(taskItem, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-            return taskItem;
+
+            return TaskDto.CreateDto(taskItem);
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Ошибка при создании новой задачи: {TaskDto}", taskDto);
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }
 
-    public async Task<ResultT<TaskItem>> UpdateAsync(Guid taskId, TaskDto taskDto, CancellationToken cancellationToken)
+    public async Task<ResultT<TaskDto>> UpdateAsync(Guid taskId, TaskDto taskDto, CancellationToken cancellationToken)
     {
-        var taskItem = await context.Tasks.FirstOrDefaultAsync(
-            taskItem => taskItem.Id == taskId && 
-            taskItem.UserId == taskDto.UserId, 
-            cancellationToken: cancellationToken);
+        var taskItem = await context.Tasks
+            .FirstOrDefaultAsync(taskItem => 
+                taskItem.Id == taskId && 
+                taskItem.UserId == taskDto.UserId, 
+                cancellationToken: cancellationToken);
 
         if (taskItem == null)
         {
-            return TaskItemErrors.NotFound(taskId.ToString());
-        }
-        
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        
-        try
-        {
-            var sortOrder = taskItem.SortOrder;
-            
-            if (taskItem.TaskState != taskDto.State)
-            {
-                sortOrder = 0;
-                var newState = taskDto.State;
-                
-                await context.Tasks
-                    .Where(item => 
-                        item.UserId == taskItem.UserId &&
-                        item.TaskState == taskItem.TaskState &&
-                        item.SortOrder > taskItem.SortOrder)
-                    .ExecuteUpdateAsync(
-                        c => c.SetProperty(item => item.SortOrder, item => item.SortOrder - 1),
-                        cancellationToken);
-        
-                await context.Tasks
-                    .Where(item => 
-                        item.UserId == taskItem.UserId &&
-                        item.TaskState == newState &&
-                        item.SortOrder >= sortOrder)
-                    .ExecuteUpdateAsync(
-                        c => c.SetProperty(item => item.SortOrder, item => item.SortOrder + 1),
-                        cancellationToken);
-            }
-            
-            taskItem.Update(
-                title: taskDto.Title,
-                description: taskDto.Description,
-                state: taskDto.State,
-                sortOrder: sortOrder,
-                updatedAt: DateTime.UtcNow
+            return TaskItemErrors.NotFound(
+                taskId.ToString()
             );
-            await context.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            return taskItem;
         }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+        
+        taskItem.UpdateTaskDetails(
+            title: taskDto.Title,
+            description: taskDto.Description
+        );
+        
+        await context.SaveChangesAsync(cancellationToken);
+        return TaskDto.CreateDto(taskItem);
     }
 
     public async Task<Result> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
@@ -185,27 +153,26 @@ public class TaskService(
             
             context.Tasks.Remove(taskItem);
             await context.SaveChangesAsync(cancellationToken);
-            
-            await context.Tasks
-                .Where(item => 
-                    item.UserId == userId && 
-                    item.TaskState == taskItem.TaskState &&
-                    item.SortOrder > taskItem.SortOrder)
-                .ExecuteUpdateAsync(
-                    c => c.SetProperty(item => item.SortOrder, item => item.SortOrder - 1), 
-                    cancellationToken);   
+
+            await taskOrderService.UpdateSortOrderUpAsync(
+                userId: userId,
+                state: taskItem.TaskState,
+                minOrderExclusive: taskItem.SortOrder,
+                maxOrderExclusive: null,
+                ct: cancellationToken);
             
             await transaction.CommitAsync(cancellationToken);
             return Result.Success();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "Ошибка при удалении задачи. Task ID: {TaskId}, User ID: {UserId}", id, userId);
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }
 
-    public async Task<Result> MoveAsync(Guid taskId, Guid userId, int nextOrder, TaskState state, CancellationToken cancellationToken)
+    public async Task<Result> MoveAsync(Guid taskId, Guid userId, int newOrder, TaskState newState, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database
             .BeginTransactionAsync(cancellationToken);
@@ -213,94 +180,60 @@ public class TaskService(
         try
         {
             var taskItem = await context.Tasks
-                .FirstOrDefaultAsync(taskItem => 
-                        taskItem.Id == taskId && 
-                        taskItem.UserId == userId, 
+                .FirstOrDefaultAsync(item => item.Id == taskId && item.UserId == userId, 
                     cancellationToken: cancellationToken);
-
-            if (taskItem == null)
+            
+            if (taskItem is null)
             {
-                return TaskItemErrors.NotFound(taskId.ToString());
+                return TaskItemErrors.NotFound(
+                    id: taskId.ToString()
+                );
             }
 
-            if (state != taskItem.TaskState)
+            if (newState == taskItem.TaskState)
             {
-                await MoveToStateAsync(taskItem, state, nextOrder, cancellationToken);
+                await taskOrderService.UpdateSortOrderRangeAsync(
+                    userId: userId,
+                    state: taskItem.TaskState,
+                    oldOrder: taskItem.SortOrder,
+                    newOrder: newOrder,
+                    cancellationToken);
             }
             else
             {
-                await MoveAndReorderAsync(taskItem, nextOrder, cancellationToken);    
+                await taskOrderService.UpdateSortOrderUpAsync(
+                    userId: userId,
+                    state: taskItem.TaskState,
+                    minOrderExclusive: taskItem.SortOrder,
+                    maxOrderExclusive: null,
+                    ct: cancellationToken);
+
+                await taskOrderService.UpdateSortOrderDownAsync(
+                    userId: userId,
+                    state: newState,
+                    minOrderExclusive: newOrder,
+                    maxOrderExclusive: null,
+                    ct: cancellationToken);
+                
+                taskItem.SetState(newState);
             }
-            
+            taskItem.SetSortOrder(newOrder);
+            await context.SaveChangesAsync(cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "{Message}", ex.Message);
+            logger.LogError(ex, 
+                "Ошибка при перемещении задачи. Task ID: {TaskId}, User ID: {UserId}, NextOrder: {NextOrder}, NextState: {NextState}", 
+                taskId, 
+                userId, 
+                newOrder,
+                newState);
+            
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
-    }
-
-    private async Task MoveAndReorderAsync(TaskItem taskItem, int nextOrder, CancellationToken cancellationToken)
-    {
-        var prevOrder = taskItem.SortOrder;
-        
-        if (nextOrder > prevOrder)
-        {   
-            await context.Tasks
-                .Where(item => 
-                    item.UserId == taskItem.UserId &&
-                    item.TaskState == taskItem.TaskState &&
-                    item.SortOrder > prevOrder && 
-                    item.SortOrder <= nextOrder)
-                .ExecuteUpdateAsync(
-                    c => c.SetProperty(item => item.SortOrder, item => item.SortOrder - 1),
-                    cancellationToken);
-        }
-        else if (nextOrder < prevOrder)
-        {
-            await context.Tasks
-                .Where(item => 
-                    item.UserId == taskItem.UserId &&
-                    item.TaskState == taskItem.TaskState &&
-                    item.SortOrder < prevOrder && 
-                    item.SortOrder >= nextOrder)
-                .ExecuteUpdateAsync(
-                    c => c.SetProperty(item => item.SortOrder, item => item.SortOrder + 1),
-                    cancellationToken);
-        }
-        
-        taskItem.SetSortOrder(nextOrder);
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task MoveToStateAsync(TaskItem taskItem, TaskState nextState, int nextOrder, CancellationToken cancellationToken)
-    {
-        var prevState = taskItem.TaskState;
-        var prevOrder = taskItem.SortOrder;
-
-        await context.Tasks
-            .Where(item => 
-                item.UserId == taskItem.UserId &&
-                item.TaskState == prevState &&
-                item.SortOrder > prevOrder)
-            .ExecuteUpdateAsync(
-                c => c.SetProperty(item => item.SortOrder, item => item.SortOrder - 1),
-                cancellationToken);
-        
-        await context.Tasks
-            .Where(item => 
-                item.UserId == taskItem.UserId &&
-                item.TaskState == nextState &&
-                item.SortOrder >= nextOrder)
-            .ExecuteUpdateAsync(
-                c => c.SetProperty(item => item.SortOrder, item => item.SortOrder + 1),
-                cancellationToken);
-        
-        taskItem.SetState(nextState);
-        taskItem.SetSortOrder(nextOrder);
-        await context.SaveChangesAsync(cancellationToken);
     }
 }

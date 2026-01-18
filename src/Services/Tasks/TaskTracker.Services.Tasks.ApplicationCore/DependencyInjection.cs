@@ -13,6 +13,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITaskOrderService, TaskOrderService>();
         services.AddScoped<ITaskService, TaskService>();
         
         services.AddSingleton<IRazorEngineService>(_ =>

@@ -15,4 +15,26 @@ public record TaskDto(Guid? Id, string Title, string? Description, TaskState Sta
             sortOrder: SortOrder,
             taskState: State);
     }
+
+    public static TaskDto CreateDto(TaskItem taskItem)
+    {
+        return new TaskDto(
+            taskItem.Id, 
+            taskItem.Title, 
+            null, 
+            taskItem.TaskState, 
+            taskItem.SortOrder, 
+            taskItem.UserId);
+    }
+
+    public static TaskDto CreateWithDescription(TaskItem taskItem)
+    {
+        return new TaskDto(
+            taskItem.Id, 
+            taskItem.Title, 
+            taskItem.Description, 
+            taskItem.TaskState, 
+            taskItem.SortOrder, 
+            taskItem.UserId);
+    }
 }

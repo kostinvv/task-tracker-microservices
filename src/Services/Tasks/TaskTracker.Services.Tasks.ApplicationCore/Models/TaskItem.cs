@@ -75,12 +75,10 @@ public class TaskItem
         TaskState = state;
     }
     
-    public void Update(string title, string? description, TaskState state, int sortOrder, DateTime updatedAt)
+    public void UpdateTaskDetails(string title, string? description)
     {
         Title = title;
         Description = description;
-        TaskState = state;
-        SortOrder = sortOrder;
-        UpdatedAt = updatedAt;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

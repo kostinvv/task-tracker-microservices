@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.Api.Contracts.v1.Tasks;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.Api.Controllers.v1;
 
@@ -12,7 +11,7 @@ namespace TaskTracker.Services.Tasks.Api.Controllers.v1;
 [ApiController]
 [ApiVersion(1)]
 [Route("api/v{version:apiVersion}/tasks")]
-public class TasksController(ITaskService taskService, ILogger<TasksController> logger) : BaseController
+public class TasksController(ITaskService taskService) : BaseController
 {
     [HttpGet("board")]
     public async Task<IActionResult> GetAsync(
@@ -54,34 +53,37 @@ public class TasksController(ITaskService taskService, ILogger<TasksController> 
             cancellationToken);
         
         return result.Match(
-            onSuccess: taskItem => Ok(new TaskResponse(taskItem.Id, taskItem.Title, taskItem.TaskState, taskItem.SortOrder, taskItem.Description)),
+            onSuccess: Ok,
             onFailure: Problem
         );
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] TaskRequest taskRequest, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateTaskRequest createTaskRequest, CancellationToken cancellationToken = default)
     {
         var result = await taskService.CreateAsync(
-            taskDto: taskRequest.ToDto(userId: UserId), 
+            taskDto: createTaskRequest.ToDto(userId: UserId), 
             cancellationToken: cancellationToken);
 
         return result.Match(
             onSuccess: value => CreatedAtRoute(
                 routeName: nameof(GetByIdAsync),
                 routeValues: new { id = value.Id },
-                new TaskResponse(value.Id, value.Title, value.TaskState, value.SortOrder)
+                value
             ),
             onFailure: Problem
         );
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateAsync(Guid id, TaskRequest taskRequest, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateAsync(
+        Guid id, 
+        [FromBody] UpdateTaskDetailsRequest request, 
+        CancellationToken cancellationToken = default)
     {
         var result = await taskService.UpdateAsync(
             taskId: id,
-            taskDto: taskRequest.ToDto(userId: UserId), 
+            taskDto: request.ToDto(userId: UserId), 
             cancellationToken: cancellationToken);
         
         return result.Match(
@@ -107,13 +109,11 @@ public class TasksController(ITaskService taskService, ILogger<TasksController> 
         [FromBody] TaskMoveRequest moveRequest, 
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("TaskId: {TaskId}. Request: {MoveRequest}", id, moveRequest);
-
         var result = await taskService.MoveAsync(
             taskId: id, 
             userId: UserId, 
-            nextOrder: moveRequest.NextOrder,
-            state: moveRequest.NewState,
+            newOrder: moveRequest.NewOrder,
+            newState: moveRequest.NewState,
             cancellationToken);
         
         return result.Match(

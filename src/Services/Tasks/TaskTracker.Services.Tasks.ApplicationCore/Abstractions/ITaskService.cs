@@ -11,13 +11,13 @@ public interface ITaskService
     
     Task<ResultT<IEnumerable<TaskListDto>>> GetBoardAsync(Guid userId, int size, CancellationToken cancellationToken);
     
-    Task<ResultT<TaskItem>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken);
+    Task<ResultT<TaskDto>> GetByIdAsync(Guid taskId, Guid userId, CancellationToken cancellationToken);
     
-    Task<ResultT<TaskItem>> CreateAsync(TaskDto taskDto, CancellationToken cancellationToken);
+    Task<ResultT<TaskDto>> CreateAsync(TaskDto taskDto, CancellationToken cancellationToken);
 
-    Task<ResultT<TaskItem>> UpdateAsync(Guid taskId, TaskDto taskDto, CancellationToken cancellationToken);
+    Task<ResultT<TaskDto>> UpdateAsync(Guid taskId, TaskDto taskDto, CancellationToken cancellationToken);
     
     Task<Result> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken);
     
-    Task<Result> MoveAsync(Guid taskId, Guid userId, int nextOrder, TaskState state, CancellationToken cancellationToken); 
+    Task<Result> MoveAsync(Guid taskId, Guid userId, int newOrder, TaskState newState, CancellationToken cancellationToken); 
 }
