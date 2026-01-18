@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
-using TaskTracker.Services.Shared.Events.Users;
+using Microsoft.Extensions.Logging;
+using TaskTracker.Services.Shared.Emails;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Auth;
@@ -9,9 +10,11 @@ using TaskTracker.Services.Tasks.ApplicationCore.Models;
 namespace TaskTracker.Services.Tasks.ApplicationCore.Services;
 
 public class UserService(
+    ILogger<UserService> logger,
     IJwtProvider jwtProvider, 
     UserManager<ApplicationUser> userManager,
-    IKafkaProducer<UserRegisteredEvent> kafkaProducer): IUserService
+    IKafkaProducer<EmailNotificationEvent> kafkaProducer,
+    IEmailTemplateService emailTemplateService): IUserService
 {
     public async Task<ResultT<AuthenticationResult>> RegisterAsync(
         string email, 
@@ -31,11 +34,34 @@ public class UserService(
             var description = identityResult.Errors.First().Description;
             return UserErrors.CreateFailure(description);
         }
+
+        logger.LogInformation(
+            "Учетная запись пользователя создана в базе данных. UserId: {UserId}", 
+            applicationUser.Id);
         
-        await kafkaProducer.ProduceAsync(
-            key: Guid.NewGuid().ToString(),
-            new UserRegisteredEvent(UserId:  applicationUser.Id, Email: email), 
-            cancellationToken);
+        try
+        {
+            var greetingMessage = await emailTemplateService.GetEmailBodyAsync(
+                emailTemplate: EmailTemplate.Greeting,
+                model: null);
+
+            var emailNotificationEvent = EmailNotificationEvent.Create(
+                email: email, 
+                subject: EmailTemplate.Greeting.GetSubjectFromResource()!,
+                body: greetingMessage!);
+            
+            await kafkaProducer.ProduceAsync(
+                key: Guid.NewGuid().ToString(),
+                message: emailNotificationEvent, 
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                exception: ex, 
+                message: "Не удалось сформировать приветственное электронное письмо для пользователя {Email}",
+                email);
+        }
         
         var jwtToken = jwtProvider.GenerateJwtToken(applicationUser);
         return new AuthenticationResult(jwtToken);
