@@ -17,7 +17,8 @@ export function TaskItem({id, title, columnTitle, showUpdateTaskModal}) {
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0 : 1
+        opacity: isDragging ? 0 : 1,
+        touchAction: 'none'
     };
 
     return (
