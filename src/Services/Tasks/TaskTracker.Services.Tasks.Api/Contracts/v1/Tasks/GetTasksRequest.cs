@@ -10,7 +10,7 @@ public class GetTasksRequest
     public int Size { get; set; }
 
     [Required]
-    public int AfterPosition { get; set; }
+    public int Skip { get; set; }
     
     [Required]
     public TaskState State { get; set; }

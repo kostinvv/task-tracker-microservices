@@ -34,7 +34,7 @@ public class TasksController(ITaskService taskService, ILogger<TasksController> 
     {
         var result = await taskService.GetAsync(
             userId: UserId,
-            request.AfterPosition,
+            request.Skip,
             request.Size,
             request.State,
             cancellationToken);

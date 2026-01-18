@@ -7,7 +7,7 @@ namespace TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 
 public interface ITaskService
 {
-    Task<ResultT<CursorList<TaskDto>>> GetAsync(Guid userId, int afterPosition, int size, TaskState state, CancellationToken cancellationToken);
+    Task<ResultT<PagedList<TaskDto>>> GetAsync(Guid userId, int skip, int size, TaskState state, CancellationToken cancellationToken);
     
     Task<ResultT<IEnumerable<TaskListDto>>> GetBoardAsync(Guid userId, int size, CancellationToken cancellationToken);
     

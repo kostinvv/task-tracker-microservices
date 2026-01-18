@@ -170,7 +170,7 @@ function TaskBoard() {
                             key={column.id} 
                             id={column.id} 
                             title={column.title} 
-                            cursorList={column.cursorList}
+                            pagedList={column.pagedList}
                             showCreateTaskModal={showCreateTaskModal}
                             showUpdateTaskModal={showUpdateTaskModal}
                         />

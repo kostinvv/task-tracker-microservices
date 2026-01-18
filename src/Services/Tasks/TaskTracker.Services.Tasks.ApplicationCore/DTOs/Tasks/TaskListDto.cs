@@ -2,7 +2,7 @@ using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.ApplicationCore.DTOs.Tasks;
 
-public class TaskListDto(TaskState id, string title, CursorList<TaskDto> cursorList)
+public class TaskListDto(TaskState id, string title, PagedList<TaskDto> pagedList)
 {
     /// <summary>
     /// Идентификатор колонки с задачами.
@@ -17,5 +17,5 @@ public class TaskListDto(TaskState id, string title, CursorList<TaskDto> cursorL
     /// <summary>
     /// Список задач.
     /// </summary>
-    public CursorList<TaskDto> CursorList { get; } = cursorList;
+    public PagedList<TaskDto> PagedList { get; } = pagedList;
 }

@@ -15,7 +15,7 @@ export default class TasksStore {
     }
 
     getLastPosition = (id) => {
-        return this.columns[id].cursorList.items.length - 1
+        return this.columns[id].pagedList.items.length;
     }
 
     async getBoard() {
@@ -27,17 +27,17 @@ export default class TasksStore {
         }
     }
 
-    loadMoreTasks = async (afterPosition, state) => {
+    loadMoreTasks = async (skip, state) => {
         try {
-            const response = await TasksService.getTasks(afterPosition, state);
+            const response = await TasksService.getTasks(skip, state);
             const columnIndex = this.columns.findIndex((column) => column.id === state);
 
             const currentColumn = this.columns[columnIndex];
-            const existingIds = new Set(currentColumn.cursorList.items.map(task => task.id));
+            const existingIds = new Set(currentColumn.pagedList.items.map(task => task.id));
             const uniqueIds = response.data.items.filter(task => !existingIds.has(task.id));
 
-            currentColumn.cursorList.items.push(...uniqueIds);
-            currentColumn.cursorList.hasNextPage = response.data.hasNextPage;
+            currentColumn.pagedList.items.push(...uniqueIds);
+            currentColumn.pagedList.hasNextPage = response.data.hasNextPage;
             this.setColumns([...this.columns]);
 
         } catch (error) {
@@ -52,7 +52,7 @@ export default class TasksStore {
 
         if (dndType === DND_TASK_TYPE) {
             return this.columns.find((column) => 
-                column.cursorList.items.find((task) => task.id === id)
+                column.pagedList.items.find((task) => task.id === id)
             );   
         }
     }
@@ -62,7 +62,7 @@ export default class TasksStore {
         if (!column) {
             return;
         }
-        return column.cursorList.items.findIndex((task) => task.id === id);
+        return column.pagedList.items.findIndex((task) => task.id === id);
     }
 
     saveTaskMove = (prevActiveIndex, activeId) => {
@@ -72,7 +72,7 @@ export default class TasksStore {
             return;
         }
 
-        const newActiveTaskIndex = activeColumn.cursorList.items.findIndex((task) => task.id === activeId);
+        const newActiveTaskIndex = activeColumn.pagedList.items.findIndex((task) => task.id === activeId);
         const activeColumnIndex = this.columns.findIndex((column) => column.id === activeColumn.id);
 
         try {
@@ -101,14 +101,14 @@ export default class TasksStore {
             return;
         }
 
-        const activeTaskIndex = activeColumn.cursorList.items.findIndex((task) => task.id === activeId);
+        const activeTaskIndex = activeColumn.pagedList.items.findIndex((task) => task.id === activeId);
 
         let newItems = [...this.columns];
-        const [removedItem] = newItems[activeColumnIndex].cursorList.items.splice(
+        const [removedItem] = newItems[activeColumnIndex].pagedList.items.splice(
             activeTaskIndex,
             1
         );
-        newItems[overColumnIndex].cursorList.items.push(removedItem);
+        newItems[overColumnIndex].pagedList.items.push(removedItem);
         this.setColumns(newItems);
     }
 
@@ -122,24 +122,24 @@ export default class TasksStore {
         
         const activeColumnIndex = this.columns.findIndex((column) => column.id === activeColumn.id);
         const overColumnIndex = this.columns.findIndex((column) => column.id === overColumn.id);
-        const activeTaskIndex = activeColumn.cursorList.items.findIndex((task) => task.id === activeId);
-        const overTaskIndex = overColumn.cursorList.items.findIndex((task) => task.id === overId);
+        const activeTaskIndex = activeColumn.pagedList.items.findIndex((task) => task.id === activeId);
+        const overTaskIndex = overColumn.pagedList.items.findIndex((task) => task.id === overId);
         
         if (activeColumnIndex === overColumnIndex) {
             let newItems = [...this.columns];
-            newItems[activeColumnIndex].cursorList.items = arrayMove(
-                newItems[activeColumnIndex].cursorList.items,
+            newItems[activeColumnIndex].pagedList.items = arrayMove(
+                newItems[activeColumnIndex].pagedList.items,
                 activeTaskIndex,
                 overTaskIndex
             );
             this.setColumns(newItems);
         } else {
             let newItems = [...this.columns];
-            const [removedItem] = newItems[activeColumnIndex].cursorList.items.splice(
+            const [removedItem] = newItems[activeColumnIndex].pagedList.items.splice(
                 activeTaskIndex,
                 1
             );
-            newItems[overColumnIndex].cursorList.items.splice(
+            newItems[overColumnIndex].pagedList.items.splice(
                 overTaskIndex,
                 0,
                 removedItem
@@ -159,7 +159,7 @@ export default class TasksStore {
 
     createTask = async (request) => {
         try {
-            const items = this.columns[request.state].cursorList.items.slice(-1);
+            const items = this.columns[request.state].pagedList.items.slice(-1);
             let sortOrder = 0
 
             const response = await TasksService.createTask({
@@ -168,7 +168,7 @@ export default class TasksStore {
             });
 
             const newItem = response.data;
-            this.columns[request.state].cursorList.items.splice(sortOrder, 0, newItem);
+            this.columns[request.state].pagedList.items.splice(sortOrder, 0, newItem);
             this.setColumns([...this.columns]);
 
             return response;
@@ -183,9 +183,9 @@ export default class TasksStore {
 
             let newItems = [...this.columns];
             const column = newItems[state];
-            const activeTaskIndex = column.cursorList.items.findIndex((task) => task.id === id);
+            const activeTaskIndex = column.pagedList.items.findIndex((task) => task.id === id);
 
-            column.cursorList.items.splice(activeTaskIndex, 1);
+            column.pagedList.items.splice(activeTaskIndex, 1);
             this.setColumns(newItems);
 
             return response;
@@ -199,19 +199,19 @@ export default class TasksStore {
             let newItems = [...this.columns];
             const column = newItems[taskState];
 
-            const activeTaskIndex = column.cursorList.items.findIndex((task) => task.id === taskId);
-            const task = column.cursorList.items[activeTaskIndex];
+            const activeTaskIndex = column.pagedList.items.findIndex((task) => task.id === taskId);
+            const task = column.pagedList.items[activeTaskIndex];
             task.title = updateTaskRequest.title;
 
             if (taskState !== updateTaskRequest.state) {
-                const [removedItem] = newItems[taskState].cursorList.items.splice(
+                const [removedItem] = newItems[taskState].pagedList.items.splice(
                     activeTaskIndex,
                     1
                 );
                 
                 const newSortOrder = 0;
 
-                newItems[updateTaskRequest.state].cursorList.items.splice(newSortOrder, 0, removedItem);
+                newItems[updateTaskRequest.state].pagedList.items.splice(newSortOrder, 0, removedItem);
                 task.sortOrder = newSortOrder;
                 task.state = updateTaskRequest.state;
             }

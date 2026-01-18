@@ -7,8 +7,8 @@ export default class TasksService {
         return await api.get(`/tasks/board?size=${TasksService.pageSize}`);
     }
 
-    static async getTasks(afterPosition, state) {
-        return await api.get(`/tasks?size=${TasksService.pageSize}&afterPosition=${afterPosition}&state=${state}`);
+    static async getTasks(skip, state) {
+        return await api.get(`/tasks?size=${TasksService.pageSize}&skip=${skip}&state=${state}`);
     }
 
     static async getTask(id) {

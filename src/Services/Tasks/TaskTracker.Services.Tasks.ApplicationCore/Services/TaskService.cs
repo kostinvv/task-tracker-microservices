@@ -15,9 +15,9 @@ public class TaskService(
     IApplicationDbContext context, 
     ILogger<TaskService> logger) : ITaskService
 {
-    public async Task<ResultT<CursorList<TaskDto>>> GetAsync(
+    public async Task<ResultT<PagedList<TaskDto>>> GetAsync(
         Guid userId, 
-        int afterPosition, 
+        int skip, 
         int size, 
         TaskState state, 
         CancellationToken cancellationToken)
@@ -25,19 +25,16 @@ public class TaskService(
         var query = context.Tasks
             .AsNoTracking()
             .OrderBy(taskItem => taskItem.SortOrder)
-            .Where(taskItem => 
-                taskItem.UserId == userId && 
-                taskItem.TaskState == state &&
-                taskItem.SortOrder > afterPosition)
+            .Where(taskItem => taskItem.UserId == userId && taskItem.TaskState == state)
             .Select(taskItem => new TaskDto(
-                taskItem.Id, 
-                taskItem.Title, 
-                taskItem.Description, 
-                taskItem.TaskState, 
-                taskItem.SortOrder, 
+                taskItem.Id,
+                taskItem.Title,
+                null,
+                taskItem.TaskState,
+                taskItem.SortOrder,
                 taskItem.UserId));
         
-        return await CursorList<TaskDto>.CreateAsync(query, size);
+        return await PagedList<TaskDto>.CreateAsync(query, size, skip, cancellationToken);
     }
 
     public async Task<ResultT<IEnumerable<TaskListDto>>> GetBoardAsync(
@@ -59,15 +56,15 @@ public class TaskService(
                 .Select(taskItem => new TaskDto(
                     taskItem.Id,
                     taskItem.Title,
-                    taskItem.Description,
+                    null,
                     taskItem.TaskState,
                     taskItem.SortOrder,
                     taskItem.UserId));
 
-            var pagedList = await CursorList<TaskDto>
-                .CreateAsync(query, size);
+            var pagedList = await PagedList<TaskDto>
+                .CreateAsync(query, size, skip: 0, cancellationToken);
             
-            result.Add(new TaskListDto(id: state, title: state.GetDisplayName(), cursorList: pagedList));
+            result.Add(new TaskListDto(id: state, title: state.GetDisplayName(), pagedList: pagedList));
         }
 
         return result;

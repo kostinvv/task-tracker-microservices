@@ -7,7 +7,7 @@ import { Button, Card, Col } from 'antd';
 import { DND_COLUMN_TYPE } from '../../../constants.js';
 import { PlusOutlined } from '@ant-design/icons';
 
-export function TaskColumn({ id, title, cursorList, showCreateTaskModal, showUpdateTaskModal }) {
+export function TaskColumn({ id, title, pagedList, showCreateTaskModal, showUpdateTaskModal }) {
     const { store } = useContext(Context);
     const { setNodeRef } = useDroppable({ 
         id: id,
@@ -18,8 +18,8 @@ export function TaskColumn({ id, title, cursorList, showCreateTaskModal, showUpd
 
     const handleShowMore = () => {
         const stateId = id;
-        const afterPosition = store.tasks.getLastPosition(stateId);
-        store.tasks.loadMoreTasks(afterPosition, stateId);
+        const skip = store.tasks.getLastPosition(stateId);
+        store.tasks.loadMoreTasks(skip, stateId);
     }
 
     return (                
@@ -29,8 +29,8 @@ export function TaskColumn({ id, title, cursorList, showCreateTaskModal, showUpd
                 title={title}
             >
                 <div ref={setNodeRef}>
-                    <SortableContext id={id} items={cursorList.items.map((task => task.id))}> 
-                        {cursorList.items.map((task) => 
+                    <SortableContext id={id} items={pagedList.items.map((task => task.id))}> 
+                        {pagedList.items.map((task) => 
                             <TaskItem 
                                 key={task.id} 
                                 id={task.id} 
@@ -41,7 +41,7 @@ export function TaskColumn({ id, title, cursorList, showCreateTaskModal, showUpd
                         )} 
                     </SortableContext>      
                 </div>  
-                { cursorList.hasNextPage ? <Button onClick={handleShowMore} style={{ marginBottom: 12 }}>Show More</Button> : null }
+                { pagedList.hasNextPage ? <Button onClick={handleShowMore} style={{ marginBottom: 12 }}>Show More</Button> : null }
                 <Button onClick={() => showCreateTaskModal(id)} type="dashed" size="large" icon={<PlusOutlined />} block>Add Task</Button>
             </Card>
         </Col>
