@@ -38,7 +38,7 @@ public class KafkaProducer<TMessage> : IKafkaProducer<TMessage>
     {
         try
         {
-            await _producer.ProduceAsync(topic: _topic, new Message<string, TMessage>()
+            await _producer.ProduceAsync(topic: _topic, new Message<string, TMessage>
             {
                 Key = key,
                 Value = message

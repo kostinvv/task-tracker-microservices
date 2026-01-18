@@ -1,4 +1,4 @@
-namespace TaskTracker.Services.EmailSender.Infrastructure;
+namespace TaskTracker.Services.EmailSender.Options;
 
 public class KafkaOptions
 {

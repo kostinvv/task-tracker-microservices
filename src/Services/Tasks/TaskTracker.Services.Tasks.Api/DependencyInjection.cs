@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TaskTracker.Services.Shared.Events.Users;
+using TaskTracker.Services.Shared.Emails;
 using TaskTracker.Services.Tasks.Api.ApiExtensions;
 using TaskTracker.Services.Tasks.ApplicationCore;
 using TaskTracker.Services.Tasks.ApplicationCore.Models;
@@ -23,7 +23,7 @@ public static class DependencyInjection
         var connectionString = Environment.GetEnvironmentVariable(ConnectionStringSectionName)!;
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
         
-        builder.Services.AddProducer<UserRegisteredEvent>(builder.Configuration
+        builder.Services.AddProducer<EmailNotificationEvent>(builder.Configuration
             .GetSection(key: $"{KafkaOptions.SectionName}:{KafkaOptions.TasksSectionName}"));
         
         builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
@@ -45,7 +45,7 @@ public static class DependencyInjection
         );
         
         builder.Services.AddAuthConfiguration(builder.Configuration);
-        builder.Services.AddApplicationCore(builder.Configuration);
+        builder.Services.AddApplicationCore();
         builder.Services.AddInfrastructure();
         
         return builder.Build();

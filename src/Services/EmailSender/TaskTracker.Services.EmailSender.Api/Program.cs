@@ -2,8 +2,7 @@ Env.TraversePath().Load("./.env.emailsender");
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddConsumer<UserRegisteredEvent, UserRegisteredEventHandler>(
-    builder.Configuration.GetSection(KafkaOptions.SectionName));
+builder.Services.AddApplicationServices(configuration: builder.Configuration);
 
 var app = builder.Build();
 

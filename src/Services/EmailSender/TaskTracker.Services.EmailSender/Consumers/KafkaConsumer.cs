@@ -1,27 +1,29 @@
 using Confluent.Kafka;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TaskTracker.Services.EmailSender.Infrastructure.Handlers;
+using TaskTracker.Services.EmailSender.Abstractions;
+using TaskTracker.Services.EmailSender.Options;
 
-namespace TaskTracker.Services.EmailSender.Infrastructure.Consumers;
+namespace TaskTracker.Services.EmailSender.Consumers;
 
 public class KafkaConsumer<TMessage> : BackgroundService
 {
     private readonly ILogger<KafkaConsumer<TMessage>> _logger;
-    private readonly IEventHandler<TMessage> _handler;
     private readonly IConsumer<string, TMessage> _consumer;
+    private readonly IServiceProvider _serviceProvider;
     private readonly string _topic;
 
     public KafkaConsumer(
         ILogger<KafkaConsumer<TMessage>> logger,
-        IEventHandler<TMessage> handler,
-        IOptions<KafkaOptions> options)
+        IOptions<KafkaOptions> options,
+        IServiceProvider serviceProvider)
     {
         var option = options.Value;
         _topic = option.Topic;
         _logger = logger;
-        _handler = handler;
+        _serviceProvider = serviceProvider;
         
         var consumerConfig = new ConsumerConfig
         {
@@ -64,10 +66,13 @@ public class KafkaConsumer<TMessage> : BackgroundService
                     if (ex.Error.IsFatal) throw;
                     continue;
                 }
+
+                using var scope = _serviceProvider.CreateScope();
+                var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<TMessage>>();
                 
                 try
                 {
-                    await _handler.HandleAsync(
+                    await handler.HandleAsync(
                         result.Message.Key,
                         result.Message.Value,
                         stoppingToken);
@@ -77,7 +82,7 @@ public class KafkaConsumer<TMessage> : BackgroundService
                 }
                 catch (KafkaException ex)
                 {
-                    _logger.LogWarning(ex, "Ошибка Kafka при обработке/commit: {Reason}", ex.Error.Reason);
+                    _logger.LogWarning(ex, "Ошибка Kafka при commit: {Reason}", ex.Error.Reason);
                 }
                 catch (Exception ex)
                 {

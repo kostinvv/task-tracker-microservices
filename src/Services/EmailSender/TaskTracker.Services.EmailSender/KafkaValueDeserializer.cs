@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Confluent.Kafka;
 
-namespace TaskTracker.Services.EmailSender.Infrastructure;
+namespace TaskTracker.Services.EmailSender;
 
 public class KafkaValueDeserializer<TMessage> : IDeserializer<TMessage>
 {
