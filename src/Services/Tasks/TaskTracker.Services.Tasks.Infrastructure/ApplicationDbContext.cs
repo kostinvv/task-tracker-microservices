@@ -18,7 +18,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(TaskItemConfiguration).Assembly);
         
-        builder.Entity<IdentityRole<Guid>>().ToTable("Roles", "identity");
+        builder.Entity<ApplicationRole>().ToTable("Roles", "identity");
         builder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles", "identity");
         builder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims", "identity");
         builder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins", "identity");
