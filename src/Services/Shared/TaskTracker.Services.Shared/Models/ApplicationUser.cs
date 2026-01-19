@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace TaskTracker.Services.Tasks.ApplicationCore.Models;
+namespace TaskTracker.Services.Shared.Models;
 
 public class ApplicationUser : IdentityUser<Guid>
 {

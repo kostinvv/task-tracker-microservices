@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TaskTracker.Services.Shared.Emails;
+using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Tasks.Api.ApiExtensions;
 using TaskTracker.Services.Tasks.ApplicationCore;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
 using TaskTracker.Services.Tasks.ApplicationCore.Options;
 using TaskTracker.Services.Tasks.Infrastructure;
 using TaskTracker.Services.Tasks.Infrastructure.Kafka;

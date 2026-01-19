@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.Api.Contracts.v1.Users;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
+using TaskTracker.Services.Tasks.ApplicationCore.DTOs;
 
 namespace TaskTracker.Services.Tasks.Api.Controllers.v1;
 

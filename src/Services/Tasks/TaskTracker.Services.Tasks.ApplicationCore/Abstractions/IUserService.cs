@@ -1,5 +1,5 @@
 using TaskTracker.Services.Shared.Results;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
+using TaskTracker.Services.Tasks.ApplicationCore.DTOs;
 
 namespace TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 

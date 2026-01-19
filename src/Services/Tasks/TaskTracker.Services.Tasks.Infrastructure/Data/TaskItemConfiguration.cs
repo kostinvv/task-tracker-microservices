@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
+using TaskTracker.Services.Shared.Models;
 
 namespace TaskTracker.Services.Tasks.Infrastructure.Data;
 

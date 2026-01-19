@@ -3,8 +3,8 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Auth;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
 using TaskTracker.Services.Tasks.ApplicationCore.Options;
 
 namespace TaskTracker.Services.Tasks.Infrastructure.Auth;

@@ -1,4 +1,4 @@
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
+using TaskTracker.Services.Shared.Models;
 
 namespace TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Context;
@@ -7,7 +8,6 @@ using TaskTracker.Services.Tasks.ApplicationCore.DTOs;
 using TaskTracker.Services.Tasks.ApplicationCore.DTOs.Tasks;
 using TaskTracker.Services.Tasks.ApplicationCore.Errors;
 using TaskTracker.Services.Tasks.ApplicationCore.Extensions;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.ApplicationCore.Services;
 

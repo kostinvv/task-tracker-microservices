@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TaskTracker.Services.Tasks.ApplicationCore.Models;
+namespace TaskTracker.Services.Shared.Models;
 
 public enum TaskState
 {

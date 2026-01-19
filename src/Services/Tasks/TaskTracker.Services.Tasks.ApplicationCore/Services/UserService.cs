@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using TaskTracker.Services.Shared.Emails;
+using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Auth;
+using TaskTracker.Services.Tasks.ApplicationCore.DTOs;
 using TaskTracker.Services.Tasks.ApplicationCore.Errors;
-using TaskTracker.Services.Tasks.ApplicationCore.Models;
 
 namespace TaskTracker.Services.Tasks.ApplicationCore.Services;
 
