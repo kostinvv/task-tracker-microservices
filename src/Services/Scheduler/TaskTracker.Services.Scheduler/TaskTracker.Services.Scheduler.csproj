@@ -9,9 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DotNetEnv" Version="3.1.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="Quartz" Version="3.15.1" />
+        <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.15.1" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.15.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -21,6 +25,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Services\" />
+      <ProjectReference Include="..\..\Shared\TaskTracker.Services.Shared\TaskTracker.Services.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Model\" />
     </ItemGroup>
 </Project>

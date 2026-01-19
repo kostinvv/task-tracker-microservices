@@ -67,5 +67,15 @@ namespace TaskTracker.Services.Shared.Emails.Resources {
                 return ResourceManager.GetString("Greeting", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Work report in Task Tracker
+        ///.
+        /// </summary>
+        internal static string Report {
+            get {
+                return ResourceManager.GetString("Report", resourceCulture);
+            }
+        }
     }
 }

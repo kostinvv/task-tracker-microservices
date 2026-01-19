@@ -1,0 +1,27 @@
+<h1>Work report in Task Tracker</h1>
+
+@if (Model.UncompletedTaskCount > 0) 
+{
+    <h2>You have @Model.UncompletedTaskCount uncompleted tasks left.</h2>
+
+    <p>Some uncompleted tasks: </p>
+    <ul>
+        @foreach (var item in Model.UncompletedTasks)
+        {
+            <li>@item.Title</li>
+        }
+    </ul>
+}
+
+@if (Model.CompletedTaskCount > 0)
+{
+    <h2>Today you have completed @Model.CompletedTaskCount tasks</h2>
+
+    <p>Latest completed tasks: </p>
+    <ul>
+        @foreach (var item in Model.LastCompletedTasks)
+        {
+            <li>@item.Title</li>
+        }
+    </ul>
+}

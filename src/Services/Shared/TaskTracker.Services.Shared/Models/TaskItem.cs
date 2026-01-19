@@ -68,11 +68,13 @@ public class TaskItem
     public void SetSortOrder(int order)
     {
         SortOrder = order;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void SetState(TaskState state)
     {
         TaskState = state;
+        UpdatedAt = DateTime.UtcNow;
     }
     
     public void UpdateTaskDetails(string title, string? description)

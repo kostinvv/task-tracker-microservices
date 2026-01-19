@@ -21,4 +21,8 @@
     <data name="Greeting" xml:space="preserve">
         <value>Welcome to Task Tracker</value>
     </data>
+    <data name="Report" xml:space="preserve">
+        <value>Work report in Task Tracker
+</value>
+    </data>
 </root>

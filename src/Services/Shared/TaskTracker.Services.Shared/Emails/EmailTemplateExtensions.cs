@@ -11,7 +11,7 @@ public static class EmailTemplateExtensions
     {
         var assembly = typeof(EmailTemplateExtensions).Assembly;
         var resourceStream = assembly.GetManifestResourceStream(
-            name: $"{BaseNamespace}.{emailTemplate}.cshtml");
+            name: $"{BaseNamespace}.{emailTemplate}.html");
 
         if (resourceStream == null)
         {
