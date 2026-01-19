@@ -1,5 +1,12 @@
 global using DotNetEnv;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Options;
 global using TaskTracker.Services.Scheduler;
+global using TaskTracker.Services.Scheduler.Options;
 global using TaskTracker.Services.Scheduler.Data;
+global using RazorEngine.Configuration;
+global using RazorEngine.Templating;
+global using TaskTracker.Services.Scheduler.Abstractions;
+global using TaskTracker.Services.Shared.Emails;
+global using TaskTracker.Services.Shared.Kafka;
 global using Quartz;

@@ -1,8 +1,4 @@
-using RazorEngine.Configuration;
-using RazorEngine.Templating;
-using TaskTracker.Services.Scheduler.Abstractions;
-using TaskTracker.Services.Shared.Emails;
-using TaskTracker.Services.Shared.Kafka;
+using TaskTracker.Services.Scheduler.Services;
 
 Env.TraversePath().Load("./.env.scheduler");
 
@@ -15,8 +11,6 @@ const string kafkaSectionName = $"{KafkaOptions.SectionName}:{KafkaOptions.Tasks
 builder.Services.Configure<KafkaOptions>(builder.Configuration.GetSection(kafkaSectionName));
 builder.Services.AddSingleton<IKafkaProducer<EmailNotificationEvent>, KafkaProducer<EmailNotificationEvent>>();
 
-builder.Services.AddTransient<Worker>();
-
 builder.Services.AddSingleton<IRazorEngineService>(_ =>
 {
     var templateServiceConfiguration = new TemplateServiceConfiguration();
@@ -24,21 +18,26 @@ builder.Services.AddSingleton<IRazorEngineService>(_ =>
 });
 
 builder.Services.AddSingleton<IEmailTemplateService, RazorEmailTemplateService>();
+builder.Services.AddScoped<IUserReportService, UserReportService>();
 
-builder.Services.AddQuartz(options =>
-{
-    const string jobName = nameof(Worker);
+builder.Services.AddTransient<Worker>();
+builder.Services.Configure<SchedulerOptions>(builder.Configuration.GetSection(SchedulerOptions.SectionName));
 
-    options.AddJob<Worker>(job => job.WithIdentity(name: jobName));
+builder.Services.AddOptions<QuartzOptions>()
+    .Configure<IOptions<SchedulerOptions>>((options, dep) =>
+    {
+        const string jobName = nameof(Worker);
+        
+        options.AddJob<Worker>(job => job.WithIdentity(name: jobName));
+        
+        options.AddTrigger(trigger => trigger
+            .WithIdentity(name: jobName)
+            .ForJob(jobName)
+            .WithCronSchedule(dep.Value.CronSchedule)
+        );
+    });
 
-    options.AddTrigger(trigger => trigger
-        .WithIdentity(name: jobName)
-        .ForJob(jobName)
-        .WithCronSchedule("0 * * ? * *")
-    );
-});
-
-builder.Services.AddScoped<IUserReportService, IUserReportService>();
+builder.Services.AddQuartz();
 
 builder.Services.AddQuartzHostedService(options =>
 {
