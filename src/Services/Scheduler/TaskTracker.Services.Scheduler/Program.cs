@@ -1,5 +1,6 @@
 using RazorEngine.Configuration;
 using RazorEngine.Templating;
+using TaskTracker.Services.Scheduler.Abstractions;
 using TaskTracker.Services.Shared.Emails;
 using TaskTracker.Services.Shared.Kafka;
 
@@ -36,6 +37,8 @@ builder.Services.AddQuartz(options =>
         .WithCronSchedule("0 * * ? * *")
     );
 });
+
+builder.Services.AddScoped<IUserReportService, IUserReportService>();
 
 builder.Services.AddQuartzHostedService(options =>
 {
