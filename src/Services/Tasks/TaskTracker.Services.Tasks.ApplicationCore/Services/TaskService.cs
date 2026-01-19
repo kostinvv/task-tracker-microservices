@@ -129,11 +129,9 @@ public class TaskService(
             );
         }
         
-        taskItem.UpdateTaskDetails(
-            title: taskDto.Title,
-            description: taskDto.Description
-        );
-        
+        taskItem.Title = taskDto.Title;
+        taskItem.Description = taskDto.Description;
+
         await context.SaveChangesAsync(cancellationToken);
         return TaskDto.CreateDto(taskItem);
     }
@@ -216,9 +214,9 @@ public class TaskService(
                     maxOrderExclusive: null,
                     ct: cancellationToken);
                 
-                taskItem.SetState(newState);
+                taskItem.TaskState = newState;
             }
-            taskItem.SetSortOrder(newOrder);
+            taskItem.SortOrder = newOrder;
             await context.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using TaskTracker.Services.Shared.Models;
 
 namespace TaskTracker.Services.Shared.Data.Entities;
 
@@ -9,8 +8,10 @@ public class TaskItem
     public const int MaxTitleLength = 256;
     public const int MaxDescriptionLength = 1024;
     
-    // EF
-    private TaskItem() { }
+    private TaskState _taskState;
+    private int _sortOrder;
+    private string _title;
+    private string? _description;
     
     private TaskItem(
         string title, 
@@ -22,7 +23,7 @@ public class TaskItem
         Guid userId)
     {
         Id = Guid.NewGuid();
-        Title = title;
+        _title = title;
         Description = description;
         TaskState = taskState;
         CreatedAt = createdAt;
@@ -33,26 +34,59 @@ public class TaskItem
     }
     
     public Guid Id { get; private set; }
-    
-    [MaxLength(MaxTitleLength)]
-    public string Title { get; private set; } = null!;
-    
-    [MaxLength(MaxDescriptionLength)]
-    public string? Description { get; private set; } = string.Empty;
 
-    public TaskState TaskState { get; private set; }
+    [MaxLength(MaxTitleLength)]
+    public string Title
+    {
+        get => _title;
+        set
+        {
+            _title = value;
+            UpdatedAt  = DateTime.UtcNow;
+        }
+    }
+
+    [MaxLength(MaxDescriptionLength)]
+    public string? Description
+    {
+        get => _description;
+        set
+        {
+            _description = value;
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
     
+    public TaskState TaskState
+    {
+        get => _taskState;
+        set
+        {
+            if (_taskState == value)
+            {
+                return;
+            }
+            _taskState = value;
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
     public DateTime CreatedAt { get; private set; }
-    
     public DateTime UpdatedAt { get; private set; }
     
-    public int SortOrder { get; private set; }
+    public int SortOrder
+    {
+        get => _sortOrder;
+        set
+        {
+            if (_sortOrder == value) return;
+            _sortOrder = value;
+            UpdatedAt = DateTime.UtcNow;
+        }
+    }
     
     public Guid UserId { get; private set; }
-    
     public ApplicationUser? User { get; private set; }
-    
-    // TODO: У задачи может быть время выполнения.
     
     public static TaskItem Create(
         string title, 
@@ -64,24 +98,5 @@ public class TaskItem
         TaskState taskState = TaskState.ToDo)
     {
         return new TaskItem(title, description, taskState, createdAt, updatedAt, sortOrder, userId);
-    }
-
-    public void SetSortOrder(int order)
-    {
-        SortOrder = order;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void SetState(TaskState state)
-    {
-        TaskState = state;
-        UpdatedAt = DateTime.UtcNow;
-    }
-    
-    public void UpdateTaskDetails(string title, string? description)
-    {
-        Title = title;
-        Description = description;
-        UpdatedAt = DateTime.UtcNow;
     }
 }
