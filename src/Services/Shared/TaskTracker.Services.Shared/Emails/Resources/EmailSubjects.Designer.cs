@@ -69,8 +69,7 @@ namespace TaskTracker.Services.Shared.Emails.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Work report in Task Tracker
-        ///.
+        ///   Looks up a localized string similar to Daily Progress Report.
         /// </summary>
         internal static string Report {
             get {

@@ -1,27 +1,54 @@
-<h1>Work report in Task Tracker</h1>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+    <h1 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+        Daily Task Summary
+    </h1>
+    
+    <!-- Блок незавершенных задач -->
+    @if (Model.UncompletedTaskCount > 0)
+    {
+        <div style="margin-bottom: 25px;">
+            <h2 style="color: #e74c3c; font-size: 18px; margin-bottom: 10px;">
+                You have @Model.UncompletedTaskCount pending tasks
+            </h2>
+    
+            <p style="margin: 0 0 10px 0; color: #666;">Here are the tasks requiring your attention:</p>
+    
+            <ul style="background-color: #fff5f5; padding: 15px 15px 15px 35px; border-radius: 5px; margin-top: 0;">
+                @foreach (var item in Model.UncompletedTasks)
+                {
+                    <li style="margin-bottom: 5px;">
+                        <strong>@item.Title</strong>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
 
-@if (Model.UncompletedTaskCount > 0) 
-{
-    <h2>You have @Model.UncompletedTaskCount uncompleted tasks left.</h2>
-
-    <p>Some uncompleted tasks: </p>
-    <ul>
-        @foreach (var item in Model.UncompletedTasks)
-        {
-            <li>@item.Title</li>
-        }
-    </ul>
-}
-
-@if (Model.CompletedTaskCount > 0)
-{
-    <h2>Today you have completed @Model.CompletedTaskCount tasks</h2>
-
-    <p>Latest completed tasks: </p>
-    <ul>
-        @foreach (var item in Model.LastCompletedTasks)
-        {
-            <li>@item.Title</li>
-        }
-    </ul>
-}
+    <!-- Блок завершенных задач -->
+    @if (Model.CompletedTaskCount > 0)
+    {
+        <div style="margin-bottom: 25px;">
+            <h2 style="color: #27ae60; font-size: 18px; margin-bottom: 10px;">
+                Great job! @Model.CompletedTaskCount tasks completed today
+            </h2>
+    
+            <p style="margin: 0 0 10px 0; color: #666;">Your recent achievements:</p>
+    
+            <ul style="background-color: #f0fdf4; padding: 15px 15px 15px 35px; border-radius: 5px; margin-top: 0;">
+                @foreach (var item in Model.LastCompletedTasks)
+                {
+                    <li style="margin-bottom: 5px; color: #444;">
+                        <span style="text-decoration: line-through; color: #888;">@item.Title</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+    <!-- Кнопка перехода -->
+    <div style="text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+        <a href="#"
+           style="background-color: #3498db; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            Go to Dashboard
+        </a>
+    </div>
+</div>
