@@ -27,8 +27,4 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Shared\TaskTracker.Services.Shared\TaskTracker.Services.Shared.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Kafka\" />
-    </ItemGroup>
 </Project>

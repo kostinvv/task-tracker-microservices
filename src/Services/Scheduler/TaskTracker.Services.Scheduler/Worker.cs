@@ -1,14 +1,14 @@
 using TaskTracker.Services.Shared.Data.Entities;
 using TaskTracker.Services.Shared.Emails;
-using TaskTracker.Services.Shared.Models;
+using TaskTracker.Services.Shared.Kafka;
 using TaskTracker.Services.Shared.Models.Report;
 
 namespace TaskTracker.Services.Scheduler;
 
 public class Worker(
-    ILogger<Worker> logger,
     SchedulerDbContext schedulerDbContext,
-    IEmailTemplateService emailTemplateService) : IJob
+    IEmailTemplateService emailTemplateService,
+    IKafkaProducer<EmailNotificationEvent> producer) : IJob
 {
     public async Task Execute(IJobExecutionContext jobExecutionContext)
     {
@@ -51,6 +51,16 @@ public class Worker(
         {
             var reportBody = await emailTemplateService.GetEmailBodyAsync(
                 EmailTemplate.Report, model: userReport);
+
+            var message = EmailNotificationEvent.Create(
+                email: userReport.Email,
+                subject: subject!,
+                body: reportBody!);
+            
+            await producer.ProduceAsync(
+                key: Guid.NewGuid().ToString(), 
+                message, 
+                cancellationToken: CancellationToken.None);
         } 
     }
 }
