@@ -1,9 +1,8 @@
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
 
-namespace TaskTracker.Services.Tasks.Infrastructure.Kafka;
+namespace TaskTracker.Services.Shared.Kafka;
 
 public class KafkaProducer<TMessage> : IKafkaProducer<TMessage>
 {

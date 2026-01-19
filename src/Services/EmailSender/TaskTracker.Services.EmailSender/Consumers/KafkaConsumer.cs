@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TaskTracker.Services.EmailSender.Abstractions;
-using TaskTracker.Services.EmailSender.Options;
+using TaskTracker.Services.Shared.Kafka;
 
 namespace TaskTracker.Services.EmailSender.Consumers;
 

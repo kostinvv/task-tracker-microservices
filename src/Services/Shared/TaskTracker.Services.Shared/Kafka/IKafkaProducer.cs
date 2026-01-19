@@ -1,4 +1,4 @@
-namespace TaskTracker.Services.Tasks.ApplicationCore.Abstractions;
+namespace TaskTracker.Services.Shared.Kafka;
 
 public interface IKafkaProducer<in TMessage> : IDisposable
 {

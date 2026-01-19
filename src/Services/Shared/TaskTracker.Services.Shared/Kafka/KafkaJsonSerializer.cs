@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Confluent.Kafka;
 
-namespace TaskTracker.Services.Tasks.Infrastructure.Kafka;
+namespace TaskTracker.Services.Shared.Kafka;
 
 public class KafkaJsonSerializer<TMessage> : ISerializer<TMessage>
 {

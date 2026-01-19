@@ -6,6 +6,7 @@ using TaskTracker.Services.EmailSender.Handlers;
 using TaskTracker.Services.EmailSender.Options;
 using TaskTracker.Services.EmailSender.Services;
 using TaskTracker.Services.Shared.Emails;
+using TaskTracker.Services.Shared.Kafka;
 
 namespace TaskTracker.Services.EmailSender;
 
