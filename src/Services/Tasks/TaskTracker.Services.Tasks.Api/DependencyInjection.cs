@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TaskTracker.Services.Shared.Data.Entities;
 using TaskTracker.Services.Shared.Emails;
 using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Tasks.Api.ApiExtensions;

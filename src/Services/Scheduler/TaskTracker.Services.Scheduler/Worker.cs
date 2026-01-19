@@ -1,5 +1,7 @@
+using TaskTracker.Services.Shared.Data.Entities;
 using TaskTracker.Services.Shared.Emails;
 using TaskTracker.Services.Shared.Models;
+using TaskTracker.Services.Shared.Models.Report;
 
 namespace TaskTracker.Services.Scheduler;
 
@@ -27,7 +29,6 @@ public class Worker(
                     .Select(item => new TaskReport
                     {
                         Title = item.Title,
-                        CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
                         TaskState = item.TaskState
                     }),
@@ -38,7 +39,6 @@ public class Worker(
                     .Select(item => new TaskReport
                     {
                         Title = item.Title,
-                        CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
                         TaskState = item.TaskState
                     })

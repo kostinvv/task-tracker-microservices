@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using TaskTracker.Services.Shared.Data.Entities;
 using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Tasks.ApplicationCore.DTOs.Tasks;
 

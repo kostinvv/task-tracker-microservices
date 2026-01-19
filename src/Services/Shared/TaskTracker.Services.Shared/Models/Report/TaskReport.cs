@@ -1,10 +1,10 @@
-namespace TaskTracker.Services.Shared.Models;
+using TaskTracker.Services.Shared.Data.Entities;
+
+namespace TaskTracker.Services.Shared.Models.Report;
 
 public class TaskReport
 {
     public required string Title { get; init; }
-
-    public required DateTime CreatedAt { get; init; }
     
     public required DateTime UpdatedAt { get; init; }
 

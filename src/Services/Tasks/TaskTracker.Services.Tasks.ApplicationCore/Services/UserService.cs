@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using TaskTracker.Services.Shared.Data.Entities;
 using TaskTracker.Services.Shared.Emails;
 using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Shared.Results;

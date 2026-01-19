@@ -1,4 +1,4 @@
-namespace TaskTracker.Services.Shared.Models;
+namespace TaskTracker.Services.Shared.Models.Report;
 
 public class UserReport
 {

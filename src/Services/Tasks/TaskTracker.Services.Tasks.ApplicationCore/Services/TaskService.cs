@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TaskTracker.Services.Shared.Data.Entities;
 using TaskTracker.Services.Shared.Models;
 using TaskTracker.Services.Shared.Results;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions;

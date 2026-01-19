@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using TaskTracker.Services.Shared.Models;
 
-namespace TaskTracker.Services.Shared.Models;
+namespace TaskTracker.Services.Shared.Data.Entities;
 
 /// <summary> Пользовательская задача. </summary>
 public class TaskItem

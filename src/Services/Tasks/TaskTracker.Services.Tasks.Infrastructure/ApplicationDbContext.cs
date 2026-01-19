@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using TaskTracker.Services.Shared.Models;
+using TaskTracker.Services.Shared.Data.Configurations;
+using TaskTracker.Services.Shared.Data.Entities;
 using TaskTracker.Services.Tasks.ApplicationCore.Abstractions.Context;
 
 namespace TaskTracker.Services.Tasks.Infrastructure;
@@ -15,11 +16,9 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(TaskItemConfiguration).Assembly);
         
-        builder.Entity<ApplicationUser>().ToTable("Users", "identity");
-        builder.Entity<ApplicationRole>().ToTable("Roles", "identity");
-        
+        builder.Entity<IdentityRole<Guid>>().ToTable("Roles", "identity");
         builder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles", "identity");
         builder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims", "identity");
         builder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins", "identity");
