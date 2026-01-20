@@ -1,4 +1,4 @@
-Env.TraversePath().Load();
+Env.TraversePath().Load("./docker-compose/.env");
 
 var builder = WebApplication.CreateBuilder(args);
 

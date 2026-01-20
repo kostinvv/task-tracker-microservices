@@ -12,6 +12,7 @@
 *.env
 *.env.*
 !*.env.*.sample
+!*.env.sample
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

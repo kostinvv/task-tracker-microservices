@@ -1,6 +1,6 @@
 using TaskTracker.Services.Scheduler.Services;
 
-Env.TraversePath().Load("./.env.scheduler");
+Env.TraversePath().Load("./docker-compose/.env.scheduler");
 
 var builder = Host.CreateApplicationBuilder(args);
 

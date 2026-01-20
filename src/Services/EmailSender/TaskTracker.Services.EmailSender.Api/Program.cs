@@ -1,4 +1,4 @@
-Env.TraversePath().Load("./.env.emailsender");
+Env.TraversePath().Load("./docker-compose/.env.emailsender");
 
 var builder = WebApplication.CreateBuilder(args);
 

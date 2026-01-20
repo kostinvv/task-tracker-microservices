@@ -6,6 +6,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Services/Scheduler/TaskTracker.Services.Scheduler/TaskTracker.Services.Scheduler.csproj", "src/Services/Scheduler/TaskTracker.Services.Scheduler/"]
+COPY ["src/Services/Shared/TaskTracker.Services.Shared/TaskTracker.Services.Shared.csproj", "src/Services/Shared/TaskTracker.Services.Shared/"]
 RUN dotnet restore "src/Services/Scheduler/TaskTracker.Services.Scheduler/TaskTracker.Services.Scheduler.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Scheduler/TaskTracker.Services.Scheduler"
